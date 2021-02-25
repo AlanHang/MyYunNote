@@ -153,3 +153,69 @@ Java虚拟机的启动时通过引导类加载器（bootstrap class loader ）�
 
 ![image-20210224200319270](JVM详解.assets/image-20210224200319270.png)
 
+## 2.4 类加载器的分类
+
+- JVM 支持两种类型的加载器，分别为引导类加载器（Bootstrap ClassLoader）和自定义类加载器（User-Defined ClassLoader）。
+- 从概念上来讲，自定义加载器一般指的是程序中由开发人员自定义的一类加载器，但是Java虚拟机规范却没有这么定义，而是==将所有派生于抽象类ClassLoader的类加载器都划分为自定义类加载器。==
+- Extension ClassLoader 和 System ClassLoader 继承自  URLClassLoader
+
+![image-20210225142945976](JVM详解.assets/image-20210225142945976.png)
+
+### 2.4.1 启动类加载器
+
+启动类加载器（引导类加载器，Bootstrap ClassLoader）
+
+- 这个类加载使用C/C++语言实现的，嵌套在JVM内部。
+- 它用来加载Java的核心库（JAVA_HOME/jre/lib/rt.jar、resource.jar或sun.boot.class.path路径下的内容），用于提供JVM自身需要的类。
+- 并不继承自java.lang.ClassLoader，没有上层加载器。
+- 加载扩展类和应用程序类加载器，并指定为他们的上层加载器。
+- 出于安全考虑，Bootstrap启动类加载器只加载包名为java，javax，sun等开头的类。
+
+![image-20210225193856604](JVM详解.assets/image-20210225193856604.png)
+
+![image-20210225193825888](JVM详解.assets/image-20210225193825888.png)
+
+### 2.4.2 扩展类加载器
+
+扩展类加载器（Extension ClassLoader）
+
+- Java 语言编写，由sun.misc.Launcher$ExtClassLoader实现。
+- 派生于ClassLoader类。
+- 上层加载器为启动类加载器。
+- 从java.ext.dirs系统属性所指定的目录中加载类库，或从JDK的安装目录的jre/lib/ext子目录（扩展目录）下加载类库。如果用户创建的JAR放在此目录下，也会自动由扩展类加载器加载。
+
+![image-20210225194252668](JVM详解.assets/image-20210225194252668.png)
+
+### 2.4.3 应用程序类加载器
+
+应用程序类加载器（系统类加载器，AppClassLoader）
+
+- Java语言编写，由sun.misc.Launcher$AppClassLoader实现。
+- 派生于ClassLoader类。
+- 上层加载器为扩展类加载器
+- 它负责加载环境变量classpath或系统属性java.class.path指定路径下的类库。
+- 该类加载是程序中默认的类加载器，一般来说，Java应用类都是由它来完成加载。
+- 通过ClassLoader#getSystemClassLoader()方法可以获取到该类加载器。
+
+## 2.5 用户自定义类加载器
+
+为什么要自定义类加载器：
+
+- 隔离加载类
+- 修改类加载的方式
+- 扩展加载源
+- 防止源码泄漏
+
+![image-20210225195033227](JVM详解.assets/image-20210225195033227.png)
+
+## 2.6 双亲委派机制
+
+![image-20210225195810136](JVM详解.assets/image-20210225195810136.png)
+
+![image-20210225195951648](JVM详解.assets/image-20210225195951648.png)
+
+优势：
+
+- 避免类的重复加载
+- 保护程序安全，防止核心API被篡改。
+
