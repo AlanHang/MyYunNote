@@ -340,3 +340,145 @@ Kafka集群中有一个broker会被选举为Controller，负责**管理集群bro
 **Consumer 事务**
 
 上述事务机制主要是从Producer方面考虑，对于Consumer而言，事务的保证会相对较弱，尤其是无法保证Commit的信息被精确消费。这是由于Consumer可以通过offset访问任意信息，而且不同的Segment File 生命周期不同，同一事务的消息可能会出现重启后被删除的情况。
+
+# 4. Kafka API
+
+## 4.1 Producer API
+
+**发送流程**
+
+kafka的Producer发送消息采用的是**异步发送**的方式。在消息发送的过程中，涉及到两个线程--main线程和Sender线程，以及一个线程共享变量--RecordAccumulator。main线程将消息发送给RecordAccumulator，Sender线程不断从RecordAccumulator中拉取消息发送到Kafka broker。
+
+**Kafka 发送消息流程**
+
+![image-20210303093531423](kafka学习.assets/image-20210303093531423.png)
+
+**相关参数：**
+
+- batch.size：只有数据积累到batch.size之后，sender才会发送数据。
+- linger.ms：如果数据迟迟未达到batch.size，sender等待linger.time之后就会发送数据。
+
+**添加依赖**
+
+```xml
+<dependency>
+    <groupId>org.apache.kafka</groupId>
+    <artifactId>kafka-client</artifactId>
+    <version>对应的版本即可</version>
+</dependency>
+```
+
+用到的类：
+
+- KafkaProducer：生产者对象，用来发送数据
+- ProducerConfig：配置参数
+- ProducerRecord：数据要被封装成一个ProducerRecord对象
+
+``` java
+Properties props = new Properties();
+/**
+* 常量类 ProducerConfig ConsumerConfig CommonConfig 
+*/
+//指定连接的kafka集群
+props.put("bootstrap.servers", "172.0.0.1:9092");
+//ACK级别
+props.put("acks", "all");
+//重试次数
+props.put("retries", 3);
+//批次大小
+props.put("batch.size", 16384);
+//等待时间
+props.put("linger.ms", 1);
+//RecordAccumulator缓冲区大小
+props.put("buffer.memory", 33554432);
+//key值的序列化类
+props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+//value值的序列化类
+props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+//生产者对象
+Producer<String, String> procuder = new KafkaProducer<String,String>(props);
+//定义主题
+String topic = "test";
+for (int i = 1; i <= 10; i++) {
+    String value = "value_" + i;
+    ProducerRecord<String, String> msg = new ProducerRecord<String, String>(topic, value);
+    //发送数据
+    procuder.send(msg);
+    //procuder.send.get()可以阻塞主线程，同步等待数据完成。
+}
+//关闭资源
+producer.close
+```
+
+自定义存储offset需要借助ConsumerRebalanceListener。
+
+## 4.2 Consumer API
+
+``` java
+Properties props = new Properties();
+//指定连接的kafka集群
+props.put("bootstrap.servers", "172.0.0.1:9092");
+//消费者组名
+props.put("group.id", GROUPID);
+//自动提交
+props.put("enable.auto.commit", "true");
+//自动提交间隔时间
+props.put("auto.commit.interval.ms", "1000");
+//连接超时时间
+props.put("session.timeout.ms", "30000");
+// Consumer每次调用poll()时取到的records的最大数。
+props.put("max.poll.records", 1000);
+/**
+这个配置项，是告诉Kafka Broker在发现kafka在没有初始offset，或者当前的offset是一个不存在的值（如果一个record被删除，就肯定不存在了）时，该如何处理。它有4种处理方式：
+1） earliest：自动重置到最早的offset。
+2） latest：看上去重置到最晚的offset。
+3） none：如果边更早的offset也没有的话，就抛出异常给consumer，告诉consumer在整个consumer group中都没有发现有这样的offset。
+4） 如果不是上述3种，只抛出异常给consumer。*/
+props.put("auto.offset.reset", "earliest");
+//反序列化类
+props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+KafkaConsumer<String, String> consumer = new KafkaConsumer<String, String>(props);
+//订阅主题
+consumer.subscribe(Arrays.asList(topic));
+//获取数据
+ConsumerRecords<String,String> consumerRecords = consumer.poll(100);
+//关闭连接
+consumer.close;
+
+/**
+手动提交offset需要关闭自动提交 
+props.put("enable.auto.commit", "false");
+同步提交consumer.commitSync
+异步提交consumer.commitAsync*/
+```
+
+## 4.3 自定义拦截器（interceptor）
+
+需要实现org.apache.kafka.clients.producer.ProducerInterceptor接口。定义的方法包括：
+
+- configure（configs）
+
+  获取配置信息和初始化数据调用。
+
+- onSend（ProducerRecord）
+
+  该方法封装进KafkaProducer.send方法中，即它运行在用户主线程中。Producer确保在消息被序列化以及计算分区前调用该方法。==用户可以在该方法中对消息做任何操作，但最好保证不要修改消息所属的topic和分区==，否则会影响目标分区的计算。
+
+- onAcknowledgement（RecordMetadata，Exception）
+
+  ==该方法会在消息从RecordAccumulator成功返回到Broker之后，或者在发送过程中失败时调用。==并且通常都是在producer回调逻辑触发之前。onAcknowledgement运行在producer的IO线程中，因此不要在该方法中放入很重的逻辑，否则会拖慢producer的消息发送效率。
+
+- close
+
+  关闭interceptor，在执行一些资源清理工作。
+
+``` java
+ArrayList<String> interceptors = new ArrayList<>();
+interceptors.add(拦截器1);
+...
+interceptors.add(拦截器n);
+//设置自定义拦截器的值
+prop.put(ProducerConfig.INTERCEPTOR_CLASSES_CONFIG,interceptors);
+```
+
