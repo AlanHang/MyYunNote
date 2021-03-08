@@ -380,7 +380,7 @@ Properties props = new Properties();
 * 常量类 ProducerConfig ConsumerConfig CommonConfig 
 */
 //指定连接的kafka集群
-props.put("bootstrap.servers", "172.0.0.1:9092");
+props.put("bootstrap.servers", "172.0.0.1:9092,172.0.0.2:9092");
 //ACK级别
 props.put("acks", "all");
 //重试次数
