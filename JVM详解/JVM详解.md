@@ -610,7 +610,7 @@ https://docs.oracle.com/javase/8/docs/technotes/tools/unix/java.html
     -ms 是memory start 的缩写
 -Xmx用来设置对空间（年轻代+老年代）的最大内存大小
     -X  是JVM的运行参数
-    -ms 是memory max 的缩写 
+    -mx 是memory max 的缩写 
 Runtime.getRuntime.totalMemory计算时幸存0区和幸存1区只计算了一个区的内存。
 开发中建议将-Xms和—Xmx设置成相同的值。
 
@@ -1118,4 +1118,27 @@ java -Xint -version
 ![image-20210318195816945](JVM详解.assets/image-20210318195816945.png)
 
 ![image-20210318200117725](JVM详解.assets/image-20210318200117725.png)
+
+# 7. StringTable
+
+## 7.1 String 的基本特性
+
+- String字符串使用一对""引起来
+
+  - String s1 = "Hello";//字面量的定义方式
+  - String s2 = new String ("hello");
+
+- String 声明为final，不可被继承
+
+- String 实现了Serializable接口：表示字符串支持序列化；
+
+  ​           实现了Comparable接口：表示字符串可以比较大小
+
+- String在jdk8及以前内部定义了final char[] value用于存储字符串数据。jdk9时改为byte[]。
+
+- String：代表不可变的字符序列。简称：不可变性
+  - 当对字符串重新赋值时，需要重写指定内存区域取值，不能使用原有的value进行赋值。
+  - 当对现有的字符串进行连接操作时，也需要重新指定内存区域赋值，不能使用原有的value进行赋值。
+  - 当调用String的replace()方法修改指定字符或字符串时，也需要重新指定内存区域赋值，不能使用原有的value进行赋值。
+- 通过字面量的方式（区别于new）给一个字符串赋值，此时的字符串值声明在字符串常量池中。
 
