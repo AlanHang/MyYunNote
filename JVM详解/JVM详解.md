@@ -1142,3 +1142,18 @@ java -Xint -version
   - 当调用String的replace()方法修改指定字符或字符串时，也需要重新指定内存区域赋值，不能使用原有的value进行赋值。
 - 通过字面量的方式（区别于new）给一个字符串赋值，此时的字符串值声明在字符串常量池中。
 
+- ==字符串常量池中是不会存储相同内容的字符串的。==
+- Sting的String Pool是一个固定大小的Hashtable，默认值大小长度是1009。如果放进String Pool的String非常多，就会造成Hash冲突严重，从而导致链表会变长，而链表长了后直接会造成的影响就是当调用String.intern时性能会大幅度下降。
+- 使用-XX:StringTableSize来设置StringTable的长度。
+- 在jdk6中StringTable是固定的，就是1009的长度，如果常量池中的字符串过多就会导致效率下降很快，StringTableSize设置没有要求。
+- 在jdk7中，StringTable的长度默认是60013，StringTableSize设置没有要求。
+- 在jdk8中，StringTable的长度默认是60013，1009是可设置的最小值。
+
+![image-20210322160444219](JVM详解.assets/image-20210322160444219.png)
+
+![image-20210323173802927](JVM详解.assets/image-20210323173802927.png)
+
+## 7.2 字符串拼接操作
+
+![image-20210323180119867](JVM详解.assets/image-20210323180119867.png)
+
