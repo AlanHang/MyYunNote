@@ -1157,3 +1157,28 @@ java -Xint -version
 
 ![image-20210323180119867](JVM详解.assets/image-20210323180119867.png)
 
+字符连接(+)方法在jdk5.0之后使用的是StringBuilder，在jdk5.0之前使用的是StringBuffer。
+
+**String.intern()方法会在字符串常量池中的生成字符串。**
+
+## 7.3 new String 创建了几个对象
+
+**new String("ab")**
+
+会创建两个对象，看字节码就知道。new 关键字在堆空间中存储String对象的信息、字符串常量池中字符串"ab"，字节码指令ldc。
+
+**new String（"a") + new String("b")**
+
+对象1：new StringBuilder()
+
+对象2：new String("a")
+
+对象3：常量池中的"a"
+
+对象4：new String("b")
+
+对象5：常量池中的"b"
+
+**深入剖析:StringBuilder.toString()方法:**
+
+对象6 ： new String("ab"),**toString()方法的调用在字符串常量池中没有生成"ab"**。
