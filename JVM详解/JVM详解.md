@@ -1182,3 +1182,48 @@ java -Xint -version
 **深入剖析:StringBuilder.toString()方法:**
 
 对象6 ： new String("ab"),**toString()方法的调用在字符串常量池中没有生成"ab"**。
+
+---
+
+## 7.4 String.intern()
+
+``` java
+public static void main(String[] args){
+    String s = new String("1");
+    s.intern();//在调用此方法前，字符串常量池中已经存在字符“1”。
+    String s2 = "1";
+    System.out.println(s == s2);//jdk6:false jdk7/8:false
+    String s3 = new String("1")+new String("1");//s3变量记录的地址为new String("11")的地址。执行完这行代码之后常量池中不存在"11"。
+    s3.intern();//在字符串常量池中生成"11"。如何理解：jdk6:创建了一个新的对象"11",也就有新的地址。jdk7/8:此时常量池中并没有创建"11",而是创建了一个指向堆空间中new String("11")的地址。
+    String s4 = "11";//s4变量记录的地址：使用的是上一行代码执行时,在常量池中生成的"11"地址。
+    System.out.println(s3 == s4);//jdk6:false jdk7/8:true
+}
+```
+
+![image-20210325190913568](JVM详解.assets/image-20210325190913568.png)
+
+![image-20210325190933582](JVM详解.assets/image-20210325190933582.png)
+
+```` java
+public static void main(String[] args){
+    String s3 = new String("1")+new String("1");//new String("11");
+    String s4 = "11";//在字符串常量池中生成对象"11"
+    s3.intern();
+    System.out.println(s3 == s4);//jdk6:false jdk7/8:false
+}
+````
+
+![image-20210325193115998](JVM详解.assets/image-20210325193115998.png)
+
+![image-20210325193758793](JVM详解.assets/image-20210325193758793.png)
+
+![image-20210325193727849](JVM详解.assets/image-20210325193727849.png)
+
+![image-20210325193636935](JVM详解.assets/image-20210325193636935.png)
+
+---
+
+**intern()的效率测试**
+
+![image-20210325195316379](JVM详解.assets/image-20210325195316379.png)
+
