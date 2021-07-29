@@ -228,13 +228,13 @@ hadoop fs -setrep 副本数量 文件
 
 ![image-20210722162250068](hadoop3.x学习.assets/image-20210722162250068.png)
 
-网络拓扑-节点距离计算
+**网络拓扑-节点距离计算**
 
 ![image-20210722163715380](hadoop3.x学习.assets/image-20210722163715380.png)
 
 机架感知（副本存储节点选择）
 
-1）机架感知说明
+**机架感知说明**
 
 ![image-20210722164023405](hadoop3.x学习.assets/image-20210722164023405.png)
 
@@ -256,29 +256,29 @@ hadoop fs -setrep 副本数量 文件
 
 ![image-20210722170827001](hadoop3.x学习.assets/image-20210722170827001.png)
 
-查看image
+**查看image**
 
 ![image-20210722170858368](hadoop3.x学习.assets/image-20210722170858368.png)
 
-查看编辑日志
+**查看编辑日志**
 
 ![image-20210722174246559](hadoop3.x学习.assets/image-20210722174246559.png)
 
 ## 5. DataNode
 
-DataNode工作机制
+**DataNode工作机制**
 
 ![image-20210723094328584](hadoop3.x学习.assets/image-20210723094328584.png)
 
-HDFS配置:hdfs-site.xml
+**HDFS配置:hdfs-site.xml**
 
 ![image-20210723094347302](hadoop3.x学习.assets/image-20210723094347302.png)
 
-数据完整性
+**数据完整性**
 
 ![image-20210723094834055](hadoop3.x学习.assets/image-20210723094834055.png)
 
-DataNode离线时间设置
+**DataNode离线时间设置**
 
 ![image-20210723095224090](hadoop3.x学习.assets/image-20210723095224090.png)
 
@@ -294,15 +294,15 @@ DataNode离线时间设置
 
 ![image-20210723103857793](hadoop3.x学习.assets/image-20210723103857793.png)
 
-mapReduce核心思想
+**mapReduce核心思想**
 
 ![image-20210723110833959](hadoop3.x学习.assets/image-20210723110833959.png)
 
-MapReduce进程
+**MapReduce进程**
 
 ![image-20210723110906547](hadoop3.x学习.assets/image-20210723110906547.png)
 
-常用的序列化类型
+**常用的序列化类型**
 
 ![image-20210723111406344](hadoop3.x学习.assets/image-20210723111406344.png)
 
@@ -322,7 +322,94 @@ MapReduce进程
 
 ![image-20210723163346481](hadoop3.x学习.assets/image-20210723163346481.png)
 
-Job提交流程
+**Job提交流程**
 
 ![image-20210723165116133](hadoop3.x学习.assets/image-20210723165116133.png)
+
+**FileInputFormat切片源码解析**
+
+![image-20210726142539491](hadoop3.x学习.assets/image-20210726142539491.png)
+
+**FileInputFormat切片大小参数配置**
+
+![image-20210726143033992](hadoop3.x学习.assets/image-20210726143033992.png)
+
+**TextInputFormat方法**
+
+![image-20210726143141193](hadoop3.x学习.assets/image-20210726143141193.png)
+
+**CombineTextInputFormat方法**
+
+![image-20210726143947061](hadoop3.x学习.assets/image-20210726143947061.png)
+
+![image-20210726144228248](hadoop3.x学习.assets/image-20210726144228248.png)
+
+### 3.2 MapReduce工作流程
+
+Reduce端进行数据的拉取。
+
+![image-20210726145822917](hadoop3.x学习.assets/image-20210726145822917.png)
+
+![image-20210726150142932](hadoop3.x学习.assets/image-20210726150142932.png)
+
+### 3.3 Shuffle机制
+
+Map方法之后，Reduce方法之前的数据处理称为Shuffle。
+
+> 排序的方法为快排，对key的索引按照字典进行排序。
+
+![image-20210726150930256](hadoop3.x学习.assets/image-20210726150930256.png)
+
+**Partitioner分区**
+
+![image-20210726153559921](hadoop3.x学习.assets/image-20210726153559921.png)
+
+![image-20210726153749355](hadoop3.x学习.assets/image-20210726153749355.png)
+
+**Combiner合并**
+
+![image-20210726162650454](hadoop3.x学习.assets/image-20210726162650454.png)
+
+![image-20210726162801309](hadoop3.x学习.assets/image-20210726162801309.png)
+
+### 3.4 OutPutFormat
+
+![image-20210726174730974](hadoop3.x学习.assets/image-20210726174730974.png)
+
+### 3.5 源码分析
+
+**MapTask工作机制**
+
+![image-20210727093324372](hadoop3.x学习.assets/image-20210727093324372.png)
+
+**ReduceTask工作机制**
+
+![image-20210727093509160](hadoop3.x学习.assets/image-20210727093509160.png)
+
+**注意事项**
+
+1. ReduceTask = 0 ，表示没有Reduce阶段，输出文件个数和Map个数一致。
+2. ReduceTask默认值就是1，所以输出文件为一个。
+3. 如果数据分布不均匀，就有可能在Reduce阶段产生数据倾斜。
+4. ReduceTask数量并不是任意设置，还要考虑雨雾逻辑需求，有些情况下，需要计算全局汇总结果，就只能有1个ReduceTask。
+5. 具体多少ReduceTask，需要根据集群性能而定。
+6. 如果分区数不是1，但是ReduceTask为1，是否执行分区过程。答案是：不执行分区过程。因为在MapTask的源码中，执行分区的前提时候先判断ReduceNum个数是否大于1。不大于1肯定不执行。
+
+### 3.7 Reduce Join
+
+![image-20210727105707391](hadoop3.x学习.assets/image-20210727105707391.png)
+
+缺点：
+
+Reduce端处理的方式，合并的操作在Reduce端完成，Reduce端的处理压力太大，Map节点的运算负载则很低，资源利用率不高，且在Reduce阶段极易产生数据倾斜。
+
+### 3.8 Map Join
+
+![image-20210727142723683](hadoop3.x学习.assets/image-20210727142723683.png)
+
+### 3.9 ETL数据清洗
+
+![image-20210727172952595](hadoop3.x学习.assets/image-20210727172952595.png)
+
+## 4. MapReduce 数据压缩
 
