@@ -194,6 +194,7 @@ hadoop fs -get hdfs文件 本地路径（可修改文件名）
 ```shell
 #显示目录信息
 hadoop fs -ls 文件目录
+hadoop fs -ls hdfs://namenode:namenodeport/文件目录
 #显示文件内容
 hadoop fs -cat 文件
 #修改文件所属权限，和Linux文件系统用法相同
@@ -412,4 +413,141 @@ Reduce端处理的方式，合并的操作在Reduce端完成，Reduce端的处�
 ![image-20210727172952595](hadoop3.x学习.assets/image-20210727172952595.png)
 
 ## 4. MapReduce 数据压缩
+
+1）压缩的好处和坏处
+
+- 压缩的优点: 以减少磁盘IO、减少磁盘存储空间。
+- 压缩的缺点：增加CPU开销。
+
+2）压缩原则
+
+- 运算密集型的Job，少用压缩。
+- IO密集型的Job，多用压缩。
+
+**常用的压缩编码**
+
+![image-20210802193007526](hadoop3.x学习.assets/image-20210802193007526.png)
+
+![image-20210802193103829](hadoop3.x学习.assets/image-20210802193103829.png)
+
+**压缩方式选择**
+
+​	压缩方式选择式重点考虑：==压缩/解压缩速度、压缩率（压缩后存储大小）、压缩后是否可以支持切片。==
+
+1. Gzip压缩
+   - 优点：压缩率比较高；
+   - 确定：不支持切片，压缩/解压缩速度一般。
+2. Bzip2压缩
+   - 优点：压缩率高，支持切片；
+   - 确定：压缩/解压缩速度慢。
+3. Lzo压缩
+   - 优点：压缩/解压缩速度比较快，支持切片；
+   - 确定：压缩率一般；想支持切片需要额外创建索引。
+4. Snappy压缩
+   - 优点：压缩和解压缩速度快；
+   - 缺点：不支持切片，压缩率一般。
+
+![image-20210802194024486](hadoop3.x学习.assets/image-20210802194024486.png)
+
+**压缩参数配置**
+
+![image-20210802194146836](hadoop3.x学习.assets/image-20210802194146836.png)
+
+# Yarn
+
+## 1. Yarn资源调度器
+
+​	Yarn是一个资源调度平台，负责为运算程序提供服务器运算资源，相当于一个分布式的==操作系统平台==，而MapReduce等运算程序则相当于==运行于操作系统之上的应用程序==。集群资源管理和任务合理分配资源。
+
+### 1.1 Yarn基础架构
+
+![image-20210802200049043](hadoop3.x学习.assets/image-20210802200049043.png)
+
+### 1.2 Yarn工作机制
+
+![image-20210803192530042](hadoop3.x学习.assets/image-20210803192530042.png)
+
+### 1.3 Yarn调度器和调度算法
+
+Hadoop作业调度器主要有三种：先进先出(FIFO)、容量（Capacity Scheduler）和公平（Fail Scheduler）。Apache Hadoop3.1.3默认的资源调度器是Capacity Scheduler。CDH框架默认调度器是Fair Scheduler。
+
+详情设置在yarn-default.xml文件
+
+```xml
+<property>
+    <name>yarn.resourcemanager.scheduler.class</name>
+    <value>org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.CapacityScheduler</value>
+</property>
+```
+
+**FIFO**
+
+单队列，根据提交作业的先后顺序，先来先服务。
+
+**Capacity Scheduler**
+
+Yahoo开发的多用户调度器。
+
+- 容量调度器特点
+
+![image-20210803194258465](hadoop3.x学习.assets/image-20210803194258465.png)
+
+- 容量调度器资源分配算法
+
+![image-20210803194700825](hadoop3.x学习.assets/image-20210803194700825.png)
+
+**Fair Scheduler**
+
+Facebook开发的多用户调度器
+
+- 公平调度器特点
+
+![image-20210803195132560](hadoop3.x学习.assets/image-20210803195132560.png)
+
+公平调度器设计目标是：在时间尺度上，所有作用获得公平的资源。某一时刻一个作业应获得资源和实际获得资源的差距叫==缺额==。
+
+调度器会==优先为缺额大的作业分配资源==。
+
+![image-20210803195832665](hadoop3.x学习.assets/image-20210803195832665.png)
+
+![image-20210803200258700](hadoop3.x学习.assets/image-20210803200258700.png)
+
+- 公平调度器分配算法
+
+![image-20210803195939310](hadoop3.x学习.assets/image-20210803195939310.png)
+
+![image-20210803200210228](hadoop3.x学习.assets/image-20210803200210228.png)
+
+## 2.Yarn常用命令
+
+```shell
+#列出所有application:
+yarn application -list
+#根据application状态过滤：所有状态：ALL、NEW、NEW_SAVING、SUBMITTED、ACCEPTED、RUNNING、FINISHED、FAILED、KILLED
+yarn application -list -appStates FINISHED
+#kill application
+yarn application -kill <application_id>
+#查询application日志
+yarn logs -applicationId <application_id>
+#查询Container日志
+yarn logs -applicationId <application_id> -containerId <container_id>
+#yarn applicationattempt 查看尝试运行的任务、会显示container_id
+yarn applicationattempt -list <application_id>
+#打印applicationattempt状态
+yarn applicationattempt -status <applicationAttemptId_id>
+#列出所有容器
+yarn container -list <applicationAttemptId_id>
+#打印容器状态
+yarn container -status <container_id>
+#查看yarn node 节点状态
+yarn node -list -all
+#yarn rmadmin更新配置，加载队列配置：
+yarn rmadmin -refreshQueues
+#查看yarn queue队列
+yarn queue -status <queue_name>
+```
+
+## 3.Yarn生产环境核心配置参数
+
+![image-20210817195612811](hadoop3.x学习.assets/image-20210817195612811.png)
 
