@@ -3,12 +3,12 @@
 ##  1.入门
 
 ### Elasticsearch 与传统关系型数据库的对比
-Relational DB  -> Databases  -> Tables  -> Rows  -> Columns  
-Elasticsearch  -> Indices  -> Type  -> Documents ->Fields  
+Relational DB  -> Databases  -> Tables  -> Rows  -> Columns
+Elasticsearch  -> Indices  -> Type  -> Documents ->Fields
 //新的版本中，一个INDEX下只允许存在一个TYPE;
 
 ### 添加信息
-```
+```shell
 curl -H "Content-Type:application/json" -XPUT 'http://主机地址:9200/索引名/类型名/id ' -d '
 {
   /*添加的内容 */
@@ -17,7 +17,7 @@ curl -H "Content-Type:application/json" -XPUT 'http://主机地址:9200/索引�
 
 **例:**
 
-```
+```shell
 curl -H "Content-Type:application/json" -XPUT 'http://172.16.44.29:9200/megacorp/employee/1' -d '
 {
 "first_name" : "John",
@@ -28,17 +28,17 @@ curl -H "Content-Type:application/json" -XPUT 'http://172.16.44.29:9200/megacorp
 }
 ```
 ### 检索文档
-```
+```shell
 curl -H "Content-Type:application/json" -XGET 'http://172.16.44.29:9200/megacorp/employee/1'
 ```
 #### 简单搜索
-```
+```shell
 curl -H "Content-Type:application/json" -XGET 'http://172.16.44.29:9200/megacorp/employee/_search'
 //默认情况下回搜索会返回前10个结果
 ```
 #### 使用DSL语句查询
 Elasticsearch 提供丰富且灵活的查询语言叫做DSL查询，它允许你构建更加复杂、强大的查询：
-```
+```shell
 curl -H "Content-Type:application/json" -XGET 'http://172.16.44.29:9200/megacorp/employee/_search' -d '
 {
     "query" : {
@@ -49,7 +49,7 @@ curl -H "Content-Type:application/json" -XGET 'http://172.16.44.29:9200/megacorp
 }'
 ```
 #### 更加复杂的搜索
-```
+```shell
 curl -H "Content-Type:application/json" -XGET 'http://172.16.44.29:9400/megacorp/employee/_search?pretty' -d '
 {    
     "query" : {
@@ -70,7 +70,7 @@ curl -H "Content-Type:application/json" -XGET 'http://172.16.44.29:9400/megacorp
 ```
 #### 全文搜索
 搜索“rock climbing”的员工:
-```
+```shell
 curl -H "Content-Type:application/json" -XGET 'http://172.16.44.29:9200/megacorp/employee/_search' -d '
 {
     "query" : {
@@ -81,7 +81,7 @@ curl -H "Content-Type:application/json" -XGET 'http://172.16.44.29:9200/megacorp
 }'
 ```
 搜索结果
-```
+```shell
 {
 ...
 "hits": {
@@ -121,7 +121,7 @@ curl -H "Content-Type:application/json" -XGET 'http://172.16.44.29:9200/megacorp
 */
 ```
 #### 短语搜索
-```
+```shell
 curl -H "Content-Type:application/json" -XGET 'http://172.16.44.29:9200/megacorp/employee/_search' -d '
 {
     "query" : {
@@ -132,7 +132,7 @@ curl -H "Content-Type:application/json" -XGET 'http://172.16.44.29:9200/megacorp
 }'
 ```
 #### 高亮我们的搜索
-```
+```shell
 curl -H "Content-Type:application/json" -XGET 'http://172.16.44.29:9200/megacorp/employee/_search' -d '
 {
     "query" : {
@@ -148,7 +148,8 @@ curl -H "Content-Type:application/json" -XGET 'http://172.16.44.29:9200/megacorp
 }'
 ```
 ### 聚合
-```
+
+```shell
 /*5.x后对排序，聚合这些操作用单独的数据结构(fielddata)缓存到内存里了，需要单独开启*/
 //简单来说就是在聚合前执行如下操作:
 curl -H "Content-Type:application/json" -XGET 'http://172.16.44.29:9200/megacorp/employee/_search' -d '
@@ -161,7 +162,7 @@ curl -H "Content-Type:application/json" -XGET 'http://172.16.44.29:9200/megacorp
     }
 }'
 ```
- ```
+ ```shell
 curl -H "Content-Type:application/json" -XGET 'http://172.16.44.29:9200/megacorp/employee/_search' -d '
 {
     "aggs": {
@@ -172,7 +173,7 @@ curl -H "Content-Type:application/json" -XGET 'http://172.16.44.29:9200/megacorp
 }'
  ```
 如果我们想知道所有姓"Smith"的人最大的共同点（兴趣爱好），我们只需要增加合适的语句既可：
-```
+```shell
 curl -H "Content-Type:application/json" -XGET 'http://172.16.44.29:9200/megacorp/employee/_search' -d '
 {
     "query": {
@@ -188,7 +189,7 @@ curl -H "Content-Type:application/json" -XGET 'http://172.16.44.29:9200/megacorp
 }'
 ```
 聚合也允许分级汇总。例如，让我们统计每种兴趣下职员的平均年龄：
-```
+```shell
 curl -H "Content-Type:application/json" -XGET 'http://172.16.44.29:9200/megacorp/employee/_search' -d '
 {
     "aggs" : {
@@ -207,14 +208,14 @@ curl -H "Content-Type:application/json" -XGET 'http://172.16.44.29:9200/megacorp
 
 ### 分布式的特性
 
-&nbsp;&nbsp;&nbsp;&nbsp; 在章节的开始我们提到Elasticsearch可以扩展到上百（甚至上千）的服务器来处理PB级的数据。然而我们的教程只是给出了一些使用Elasticsearch的例子，并未涉及相关机制。  
-Elasticsearch为分布式而生，而且它的设计隐藏了分布式本身的复杂性。Elasticsearch在分布式概念上做了很大程度上的透明化，在教程中你不需要知道任何关于分布式系统、分片、集群发现或者其他大量的分布式概念。所有的教程你既可以运行在你的笔记本上，也可以运行在拥有100个节点的集群上，其工作方式是一样的  
+在章节的开始我们提到Elasticsearch可以扩展到上百（甚至上千）的服务器来处理PB级的数据。然而我们的教程只是给出了一些使用Elasticsearch的例子，并未涉及相关机制。
+Elasticsearch为分布式而生，而且它的设计隐藏了分布式本身的复杂性。Elasticsearch在分布式概念上做了很大程度上的透明化，在教程中你不需要知道任何关于分布式系统、分片、集群发现或者其他大量的分布式概念。所有的教程你既可以运行在你的笔记本上，也可以运行在拥有100个节点的集群上，其工作方式是一样的。
 Elasticsearch致力于隐藏分布式系统的复杂性。以下这些操作都是在底层自动完成的：将你的文档分区到不同的容器或者分片(shards)中，它们可以存在于一个或多个节点中。将分片均匀的分配到各个节点，对索引和搜索做负载均衡。冗余每一个分片，防止硬件故障造成的数据丢失。将集群中任意一个节点上的请求路由到相应数据所在的节点。无论是增加节点，还是移除节点，分片都可以做到无缝的扩展和迁移。
 
 ### 集群健康
 
 **查看集群健康**
-```
+```shell
 curl -H "Content-Type:application/json" -XGET 'http://172.16.44.29:9200/_cluster/health'
 ```
 status 字段提供一个综合的指标来表示集群的的服务状况。三种颜色各自的含义：  
@@ -231,7 +232,7 @@ red| 不是所有的主要分片都可用
 索引只是一个用来指向一个或多个分片(shards)的“逻辑命名空间(logical namespace)”.一个分片(shard)是一个最小级别“工作单元(worker unit)”,它只是保存了索引中所有数据的一部分。
 
 **添加索引**
-```
+```shell
 curl -H "Content-Type:application/json" -XPUT 'http://172.16.44.29:9200/blogs' -d '
 {
 "settings" : {
@@ -264,24 +265,27 @@ _index| 文档存储的地方
 _type| 文档代表的类
 _id| 文档的唯一标识
 
-**_index**  
+**_index**
 &nbsp;&nbsp;&nbsp;&nbsp; 事实上，我们的数据被存储和索引在分片(shards)中，索引只是一个把一个或多个分片分组在一起的逻辑空间，而这只是一些内部细节——我们的程序完全不用关心分片。对于我们的程序而言，文档存储在索引(index)中。
+
 > _index字必须是全部小写，不能以下划线开头，不能包含逗号。
 
-**_type**  
+**_type**
 &nbsp;&nbsp;&nbsp;&nbsp; 在Elasticsearch中，我们使用相同类型(type)的文档表示相同的“事物”，因为他们的数据结构也是相同的。  
 &nbsp;&nbsp;&nbsp;&nbsp; 每个类型(type)都有自己的映射(mapping)或者结构定义，就像传统数据库表中的列一样。所有类型下的文档被存储在同一个索引下，但是类型的映射(mapping)会告诉Elasticsearch不同的文档如何被索引。
+
 > _type 的名字可以是大写或小写，不能包含下划线或逗号。
 
-**_id**    
+**_id**
 &nbsp;&nbsp;&nbsp;&nbsp;
 id仅仅是一个字符串，它与 _index 和 _type 组合时，就可以在Elasticsearch中唯一标识一个文档。当创建一个文档，你可以自定义 _id ，也可以让Elasticsearch帮你自动生成。
+
 ### 索引一个文档
 &nbsp;&nbsp;&nbsp;&nbsp;
 文档通过 indexAPI被索引——使数据可以被存储和搜索。但是首先我们需要决定文档所在。正如我们讨论的，文档通过其 _index 、 _type 、id唯一确定。们可以自己提供一个 _id ，或者也使用 index API 为我们生成一个。  
 
 使用自己的_id:
-```
+```shell
 curl -H "Content-Type:application/json" -XPUT 'http://172.16.44.29:9200/website/blog/123' -d '
 {
     "title": "My first blog entry",
@@ -290,7 +294,7 @@ curl -H "Content-Type:application/json" -XPUT 'http://172.16.44.29:9200/website/
 }'
 ```
 elasticsearch的响应：
-```
+```shell
 {
     "_index": "website",
     "_type": "blog",
@@ -301,10 +305,11 @@ elasticsearch的响应：
 /*响应指出请求的索引已经被成功创建，这个索引中包含 _index、_type 和 _id元数据，以及一个新元素：_version 。
 Elasticsearch中每个文档都有版本号，每当文档变化（包括删除）都会使 _version 增加。*/
 ```
-自增id  
+自增id
 &nbsp;&nbsp;&nbsp;&nbsp;
 请求结构发生了变化： PUT 方法——“在这个URL中存储文档” 变成了 POST 方法—— "在这个类型下存储文档"。（译者注：原来是把文档存储到某个ID对应的空间，现在是把这个文档添加到某个 _type 下）。
-```
+
+```shell
 curl -H "Content-Type:application/json" -XPOST 'http://172.16.44.29:9200/website/blog/' -d '
 {
 "title": "My second blog entry",
@@ -313,7 +318,7 @@ curl -H "Content-Type:application/json" -XPOST 'http://172.16.44.29:9200/website
 }'
 ```
 elasticsearch响应内容:
-```
+```shell
 {
     "_index":"website",
     "_type":"blog",
@@ -332,7 +337,7 @@ identifiers, 或者叫 UUIDs。*/
 }
 ```
 ### 检索文档
-```
+```shell
 curl -H "Content-Type:application/json" -XGET 'http://172.16.44.29:9200/website/blog/_search?pretty'
 ```
 > pretty在任意的查询字符串中增加 pretty 参数，类似于上面的例子。会让Elasticsearch美化输出(pretty-print)JSON响应以便更加容易阅读。 _source 字段不会被美化，它的样子与我
@@ -342,30 +347,32 @@ curl -H "Content-Type:application/json" -XGET 'http://172.16.44.29:9200/website/
 
 > 多个查询字符串？之后用&拼起来 如：
 
-```
+```shell
 curl -H "Content-Type:application/json" -XGET 'http://172.16.44.29:9200/website/blog/1?_source=title,text&pretty'
 ```
 
 #### 检索文档的一部分
-&nbsp;&nbsp;&nbsp;&nbsp;
+
 通常， GET 请求将返回文档的全部，存储在 _source 参数中。但是可能你感兴趣的字段只是 title 。请求个别字段可以使用 _source 参数。多个字段可以使用逗号分隔：
-```
+
+```shell
 curl -H "Content-Type:application/json" -XGET 'http://172.16.44.29:9200/website/blog/1?_source=title,text'
 ```
 
 #### 检索文档是否存在
+
 如果你想做的只是检查文档是否存在——你对内容完全不感兴趣——使用 HEAD 方法来代替 GET 。 HEAD 请求不会返回响应体，只有HTTP头：
-```
+```shell
 curl -i -H "Content-Type:application/json" -XHEAD 'http://172.16.44.29:9200/website/blog/123'
 ```
 Elasticsearch将会返回 200 OK 状态如果你的文档存在：
-```
+```shell
 HTTP/1.1 200 OK
 Content-Type: text/plain; charset=UTF-8
 Content-Length: 0
 ```
 如果不存在返回 404 Not Found ：
-```
+```shell
 HTTP/1.1 404 Not Found
 Content-Type: text/plain; charset=UTF-8
 Content-Length: 0
@@ -373,7 +380,7 @@ Content-Length: 0
 
 ### 更新整个文档
 文档在Elasticsearch中是不可变的——我们不能修改他们。如果需要更新已存在的文档，我们可以使用《索引文档》章节提到的 index API 重建索引(reindex) 或者替换掉它。
-```
+```shell
 curl -H "Content-Type:application/json" -XPUT 'http://172.16.44.29:9200/website/blog/123?pretty' -d'
 {
     "title": "My first blog entry",
@@ -382,7 +389,7 @@ curl -H "Content-Type:application/json" -XPUT 'http://172.16.44.29:9200/website/
 }'
 ```
 在响应中我们可以看见Elasticsearch 把_version 增加了。
-```
+```shell
 {
   "_index" : "website",
   "_type" : "blog",
@@ -400,11 +407,12 @@ curl -H "Content-Type:application/json" -XPUT 'http://172.16.44.29:9200/website/
 
 ```
 ### 创建一个新的文档
-&nbsp;&nbsp;&nbsp;&nbsp;
+
 如果想使用自定义的 _id ，我们必须告诉Elasticsearch应该
-在 _index 、 _type 、 _id 三者都不同时才接受请求。为了做到这点有两种方法，它们其实做的是同一件事情。你可以选择适合自己的方式：  
+在 _index 、 _type 、 _id 三者都不同时才接受请求。为了做到这点有两种方法，它们其实做的是同一件事情。你可以选择适合自己的方式：
 第一种方法使用 op_type 查询参数：
-```
+
+```shell
 curl -H "Content-Type:application/json" -XPUT 'http://172.16.44.29:9200/website/blog/123?op_type=create' -d'
 {
     "title": "My first blog entry",
@@ -413,7 +421,7 @@ curl -H "Content-Type:application/json" -XPUT 'http://172.16.44.29:9200/website/
 }'
 ```
 或者第二种方法是在URL后加 /_create 做为端点：
-```
+```shell
 curl -H "Content-Type:application/json" -XPUT 'http://172.16.44.29:9200/website/blog/123/_create?pretty' -d'
 {
     "title": "My first blog entry",
@@ -422,7 +430,7 @@ curl -H "Content-Type:application/json" -XPUT 'http://172.16.44.29:9200/website/
 }'
 ```
 如果请求成功的创建了一个新文档，Elasticsearch将返回正常的元数据且响应状态码是Created 。
-```
+```shell
 {
   "_index" : "website",
   "_type" : "blog",
@@ -439,7 +447,7 @@ curl -H "Content-Type:application/json" -XPUT 'http://172.16.44.29:9200/website/
 }
 ```
 另一方面，如果包含相同的 _index 、 _type 和 _id 的文档已经存在，Elasticsearch将返回 409 Conflict 响应状态码，错误信息类似如下：
-```
+```shell
 {
   "error" : {
     "root_cause" : [
@@ -462,11 +470,11 @@ curl -H "Content-Type:application/json" -XPUT 'http://172.16.44.29:9200/website/
 ```
 ### 删除文档
 删除文档的语法模式与之前基本一致，只不过要使用 DELETE 方法：
-```
+```shell
 curl -H "Content-Type:application/json" -XDELETE 'http://172.16.44.29:9200/website/blog/123/?pretty'
 ```
 如果文档被找到，Elasticsearch将返回 200 OK 状态码和以下响应体。注意 _version 数字已经增加了。
-```
+```shell
 {
   "_index" : "website",
   "_type" : "blog",
@@ -483,7 +491,7 @@ curl -H "Content-Type:application/json" -XDELETE 'http://172.16.44.29:9200/websi
 }
 ```
 如果文档未找到，我们将得到一个 404 Not Found 状态码，响应体是这样的：
-```
+```shell
 {
   "_index" : "website",
   "_type" : "blog",
@@ -508,7 +516,7 @@ curl -H "Content-Type:application/json" -XDELETE 'http://172.16.44.29:9200/websi
 **悲观并发控制（Pessimistic concurrency control）**
 这在关系型数据库中被广泛的使用，假设冲突的更改经常发生，为了解决冲突我们把访问区块化。典型的例子是在读一行数据前锁定这行，然后确保只有加锁的那个线程可以修改这行数据。
 
-**乐观并发控制（Optimistic concurrency control）：**  
+**乐观并发控制（Optimistic concurrency control）：**
 被Elasticsearch使用，假设冲突不经常发生，也不区块化访问，然而，如果在读写过程中数据发生了变化，更新操作将失败。这时候由程序决定在失败后如何解决冲突。实际情况中，可以重新尝试更新，刷新数据（重新读取）或者直接反馈给用户。
 
 #### 乐观并发控制
@@ -517,7 +525,7 @@ Elasticsearch是分布式的。当文档被创建、更新或删除，文档的�
 上文我们提到 index 、 get 、 delete请求时，我们指出每个文档都有一个 _version 号码，这个号码在文档被改变时加一。Elasticsearch使用这个 _version 保证所有修改都被正确排序。当一个旧版本出现在新版本之后，它会被简单的忽略。  
 
 我们利用 _version 的这一优点确保数据不会因为修改冲突而丢失。我们可以指定文档的 version 来做想要的更改。如果那个版本号不是现在的，我们的请求就失败了。
-```
+```shell
 curl -H "Content-Type:application/json" -XPUT 'http://172.16.44.29:9200/website/blog/1?version=3' -d'
 {
     "title": "My first blog entry",
@@ -525,7 +533,7 @@ curl -H "Content-Type:application/json" -XPUT 'http://172.16.44.29:9200/website/
 }'
 ```
 我们只希望文档的 _version 是 3 时更新才生效。
-```
+```shell
 {
     "_index":"website",
     "_type":"blog",
@@ -542,7 +550,7 @@ curl -H "Content-Type:application/json" -XPUT 'http://172.16.44.29:9200/website/
 }
 ```
 然而，如果我们重新运行相同的索引请求，依旧指定 version=1 ，Elasticsearch将返回 409 Conflict 状态的HTTP响应。响应体类似这样：
-```
+```shell
 {
     "error":{
         "root_cause":[{
@@ -571,7 +579,7 @@ curl -H "Content-Type:application/json" -XPUT 'http://172.16.44.29:9200/website/
 中指定的一致，而是检查是否小于指定的版本。如果请求成功，外部版本号就会被存储到 _version 中。  
 
 外部版本号不仅在索引和删除请求中指定，也可以在创建(create)新文档中指定。例如，创建一个包含外部版本号 5 的新博客，我们可以这样做：
-```
+```shell
 curl -H "Content-Type:application/json" -XPUT 'http://172.16.44.29:9200/website/blog/2?version=10&version_type=external&pretty' -d '
 {
 "title": "My first external blog entry",
@@ -579,7 +587,7 @@ curl -H "Content-Type:application/json" -XPUT 'http://172.16.44.29:9200/website/
 }'
 ```
 在响应中，我们能看到当前的 _version 号码是 10 ：
-```
+```shell
 {
   "_index" : "website",
   "_type" : "blog",
@@ -596,7 +604,7 @@ curl -H "Content-Type:application/json" -XPUT 'http://172.16.44.29:9200/website/
 }
 ```
 如果你重新运行这个请求，就会返回一个像之前一样的冲突错误，因为指定的外部版本号不大于当前在Elasticsearch中的版本。
-```
+```shell
 {
   "error" : {
     "root_cause" : [
@@ -619,7 +627,7 @@ curl -H "Content-Type:application/json" -XPUT 'http://172.16.44.29:9200/website/
 ```
 ### 文档局部更新
 最简单的 update 请求表单接受一个局部文档参数 doc ，它会合并到现有文档中——对象合并在一起，存在的标量字段被覆盖，新字段被添加。举个例子，我们可以使用以下请求为博客添加一个 tags 字段和一个 views 字段：
-```
+```shell
 curl -H "Content-Type:application/json" -XPOST 'http://172.16.44.29:9200/website/blog/1/_update?&pretty' -d '
 {
     "doc" : {
@@ -631,14 +639,14 @@ curl -H "Content-Type:application/json" -XPOST 'http://172.16.44.29:9200/website
 #### 使用脚本局部更新
 
 脚本能够使用 update API改变 _source字段的内容，它在脚本内 部以 ctx._source 表示。例如，我们可以使用脚本增加博客的 views 数量：
-```
+```shell
 curl -H "Content-Type:application/json" -XPOST 'http://172.16.44.29:9200/website/blog/1/_update?pretty' -d '
 {
     "script" : "ctx._source.views+=1"
 }'
 ```
 我们还可以使用脚本增加一个新标签到 tags数组中。 在这个例子中，我们定义了一个新标签做为参数而不是硬编码在脚本里。这允许Elasticsearch未来可以重复利用脚本，而不是在想要增加新标签时必须每次编译新脚本：
-```
+```shell
 curl -H "Content-Type:application/json" -XPOST 'http://172.16.44.29:9200/website/blog/1/_update?pretty' -d '
 {
     "script":{
@@ -650,7 +658,7 @@ curl -H "Content-Type:application/json" -XPOST 'http://172.16.44.29:9200/website
 }'
 ```
 通过设置 ctx.op 为 delete 我们可以根据内容删除文档：
-```
+```shell
 curl -H "Content-Type:application/json" -XPOST 'http://172.16.44.29:9200/website/blog/1/_update?pretty' -d '
 {
     "script": {
@@ -662,7 +670,7 @@ curl -H "Content-Type:application/json" -XPOST 'http://172.16.44.29:9200/website
 }'
 ```
 当我们试图更新一个不存在的文档，更新将失败。在这种情况下，我们可以使用 upsert 参数定义文档来使其不存在时被创建。
-```
+```shell
 curl -H "Content-Type:application/json" -XPOST 'http://172.16.44.29:9200/website/pageviews/4/_update?pretty' -d '
 {
     "script" : "ctx._source.views+=1",
@@ -687,7 +695,7 @@ curl -H "Content-Type:application/json" -XPOST 'http://172.16.44.29:9200/website
 }
 ```
 
-```
+```shell
 curl -H "Content-Type:application/json" -XPOST 'http://172.16.44.29:9200/website/blog/1/_update?pretty' -d '
 {
     "script" : "ctx._source.views+=1",
@@ -698,7 +706,7 @@ curl -H "Content-Type:application/json" -XPOST 'http://172.16.44.29:9200/website
 ```
 ### 检索多个文档
 像Elasticsearch一样，检索多个文档依旧非常快。合并多个请求可以避免每个请求单独的网络开销。如果你需要从Elasticsearch中检索多个文档，相对于一个一个的检索，更快的方式是在一个请求中使用multi-get或者 mget API
-```
+```shell
 curl -H "Content-Type:application/json" -XPOST 'http://172.16.44.29:9200/_mget?pretty' -d '
 {
     "docs" : [
@@ -718,7 +726,7 @@ curl -H "Content-Type:application/json" -XPOST 'http://172.16.44.29:9200/_mget?p
 ```
 如果所有文档具有相同 _index 和 _type ，你可以通过简单的 ids 数组来代替完整
 的 docs 数组：
-```
+```shell
 curl -H "Content-Type:application/json" -XPOST 'http://172.16.44.29:9200/website/blog/_mget?pretty' -d '
 {
     "ids" : [ "2", "1" ]
@@ -742,7 +750,7 @@ curl -H "Content-Type:application/json" -XPOST 'http://172.16.44.29:9200/website
 bulk API允许我们使用单一请求来实现多个文档的 create 、 index 、 update 或delete。这对索引类似于日志活动这样的数据 流非常有用，它们可以以成百上千的数据为一个批次按序进行索引。  
 
 bulk 请求体如下，它有一点不同寻常：
-```
+```shell
 { action: { metadata }}\n
 { request body }\n
 { action: { metadata }}\n
@@ -762,21 +770,22 @@ create | 当文档不存在时创建之。
 index| 创建新文档或替换已有文档。
 update| 局部更新文档。
 delete| 删除一个文档。
-在索引、创建、更新或删除时必须指定文档的 _index 、 _type 、 _id 这些元数据(metadata)。  
+在索引、创建、更新或删除时必须指定文档的 _index 、 _type 、 _id 这些元数据(metadata)。
 例如删除请求看起来像这样：
+
 ```
 { "delete": { "_index": "website", "_type": "blog", "_id": "123" }}
 ```
 请求体(request body)由文档的 _source组成——文档所包含的一 些字段以及其值。它被 index 和 create操作所必须，这是有道 理的：你必须提供文档用来索引。  
 
 这些还被 update 操作所必需，而且请求体的组成应该与 update API（ doc , upsert ,script 等等）一致。删除操作不需要请 求体(request body)。
-```
+```shell
 { "create": { "_index": "website", "_type": "blog", "_id": "123" }}
 { "title": "My first blog post" }
 /*如果未定义_id，ID将会被自动创建*/
 ```
 为了将这些放在一起， bulk 请求表单是这样的：
-```
+```shell
 curl -H "Content-Type:application/json" -XPOST 'http://172.16.44.29:9200/_bulk?pretty' -d '
 { "delete": { "_index": "website", "_type": "blog", "_id": "123" }}\n
 { "create": { "_index": "website", "_type": "blog", "_id": "123" }}\n
@@ -790,6 +799,7 @@ curl -H "Content-Type:application/json" -XPOST 'http://172.16.44.29:9200/_bulk?p
 这些说明 bulk 请求不是原子操作——它们不能实现事务。每个请求操作时分开的，所以每个请求的成功与否不干扰其它操作。
 
 ## 4.分布式文档存储
+
 ### 路由文档到分片
 ```
 shard = hash(routing)% nuber_of_primary_shars
@@ -834,7 +844,7 @@ routing值是一个任意的字符串，它的默认值是_id但是也可以自�
 
 ### 多索引和多类别
 
-```
+```shell
 通常，当然，你可能想搜索一个或几个自定的索引或类型，我们能通过定义URL中的索引或
 类型达到这个目的，像这样：
 /_search
@@ -856,7 +866,7 @@ routing值是一个任意的字符串，它的默认值是_id但是也可以自�
 和SQL使用 LIMIT关键字返回只有一页的结果一样，Elasticsearch接受 from 和 size 参数：  
 - size : 结果数，默认 10
 - from : 跳过开始的结果数，默认 0  如果你想每页显示5个结果，页码从1到3，那请求如下：
-```
+```shell
 GET /_search?size=5
 GET /_search?size=5&from=5
 GET /_search?size=5&from=10
@@ -865,11 +875,11 @@ GET /_search?size=5&from=10
 
 ### 映射详解
 Elasticsearch 在对megacrop索引中对employee类型进行mapping后如何解读我们的文档结构：
-```
+```shell
 curl -H "Content-Type:application/json" -XGET 'http://172.16.44.29:9200/megacorp/_mapping/employee'
 ```
 analyze 语法在5.0后进行更新，被分析的文本放到text中，使用：
-```
+```shell
 curl -H "Content-Type:application/json" -XPOST 'http://172.16.44.29:9200/_analyze?pretty' -d '
 {                       
 "text" : "text to analyze"
@@ -882,7 +892,7 @@ curl -H "Content-Type:application/json" -XPOST 'http://172.16.44.29:9200/_analyz
 > 你可以向已有映射中增加字段，但你不能修改它。如果一个字段在映射中已经存在，这可能意味着那个字段的数据已经被索引。如果你改变了字段映射，那已经被索引的数据将错误并且不能被正确的搜索到。
 
 然后创建一个新索引，指定 tweet 字段的分析器为 english ：
-```
+```shell
 curl -H "Content-Type:application/json" -XPUT 'http://172.16.44.29:9200/gb' -d '
 {
     "mappings": {
@@ -907,7 +917,7 @@ curl -H "Content-Type:application/json" -XPUT 'http://172.16.44.29:9200/gb' -d '
 }'
 ```
 再后来，我们决定在 tweet 的映射中增加一个新的 not_analyzed 类型的文本字段，叫做 tag ，使用 _mapping 后缀:
-```
+```shell
 curl -H "Content-Type:application/json" -XPUT 'http://172.16.44.29:9200/gb/_mapping/tweet' -d '
 {
     "properties" : {
@@ -920,7 +930,7 @@ curl -H "Content-Type:application/json" -XPUT 'http://172.16.44.29:9200/gb/_mapp
 ```
 **测试映射**  
 你可以通过名字使用 analyzeAPI测试字符串字段的映 射。对比这两个请求的输出：
-```
+```shell
 curl -H "Content-Type:application/json" -XGET 'http://172.16.44.29:9200/gb/_analyze?pretty' -d '
 {
     "field":"tweet",
@@ -936,17 +946,19 @@ curl -H "Content-Type:application/json" -XGET 'http://172.16.44.29:9200/gb/_anal
 言之，我们的映射工作正常*/
 ```
 ### 复合类型
-**多值字段**  
+
+**多值字段**
 数组中所有值必须为同一类型。你不能把日期和字符窜混合。如果你创建一个新字段，这个字段索引了一个数组，Elasticsearch将使用第一个值的类型来确定这个新字段的类型。
+
 > 当你从Elasticsearch中取回一个文档，任何一个数组的顺序和你索引它们的顺序一致。你取回的 _source 字段的顺序同样与索引它们的顺序相同。
 >
 > 然而，数组是做为多值字段被索引的，它们没有顺序。在搜索阶段你不能指定“第一个值”或者“最后一个值”。倒不如把数组当作一个值集合(bag of values)
 
-**空字段**  
+**空字段**
 当然数组可以是空的。这等价于有零个值。事实上，Lucene没法存放 null 值，所以一个 null 值的字段被认为是空字段。
 
 这四个字段将被识别为空字段而不被索引：
-```
+```shell
 "empty_string": "",
 "null_value": null,
 "empty_array": [],
@@ -954,18 +966,21 @@ curl -H "Content-Type:application/json" -XGET 'http://172.16.44.29:9200/gb/_anal
 ```
 ## 7.结构化查询
 ### 最重要的查询过滤语句
-**term 过滤**  
+
+**term 过滤**
 term 主要用于精确匹配哪些值，比如数字，日期，布尔值或 not_analyzed 的字符串(未经分析的文本数据类型)：
-```
+
+```shell
 { "term": { "age": 26 }}
 { "term": { "date": "2014-09-01" }}
 { "term": { "public": true }}
 { "term": { "tag": "full_text" }}
 ```
 
-**terms 过滤**  
+**terms 过滤**
 terms 跟 term 有点类似，但 terms允许指定多个匹配条件。 如果某个字段指定了多个值，那么文档需要一起去做匹配：
-```
+
+```shell
 {
     "terms": {
         "tag": [ "search", "full_text", "nosql" ]
@@ -973,9 +988,10 @@ terms 跟 term 有点类似，但 terms允许指定多个匹配条件。 如果�
 }
 ```
 
-**range 过滤**  
+**range 过滤**
 range 过滤允许我们按照指定范围查找一批数据：
-```
+
+```shell
 curl -H "Content-Type:application/json" -XGET 'http://172.16.44.29:9200/megacorp/employee/_search?pretty' -d '
 {
     "query":{
@@ -1000,7 +1016,7 @@ lte :: 小于等于*/
 
 **exists 和 missing 过滤**  
 exists 和 missing 过滤可以用于查找文档中是否包含指定字段或没有某个字段，类似于SQL语句中的 IS_NULL 条件
-```
+```shell
 {
     "exists": {
         "field": "title"
@@ -1009,15 +1025,15 @@ exists 和 missing 过滤可以用于查找文档中是否包含指定字段或�
 /*这两个过滤只是针对已经查出一批数据来，但是想区分出某个字段是否存在的时候使用*/
 ```
 
-**bool 过滤**  
+**bool 过滤**
 bool 过滤可以用来合并多个过滤条件查询结果的布尔逻辑，它包含一下操作符：  
 
-must :: 多个查询条件的完全匹配,相当于 and 。  
-must_not :: 多个查询条件的相反匹配，相当于 not 。  
+must :: 多个查询条件的完全匹配,相当于 and 。
+must_not :: 多个查询条件的相反匹配，相当于 not 。
 should :: 至少有一个查询条件匹配, 相当于 or 。  
 
 这些参数可以分别继承一个过滤条件或者一个过滤条件的数组：
-```
+```shell
 {
     "bool": {
         "must": { "term": { "folder": "inbox" }},
@@ -1030,19 +1046,21 @@ should :: 至少有一个查询条件匹配, 相当于 or 。
 }
 ```
 
-**matchall 查询**  
+**matchall 查询**
 使用 match_all可以查询到所有文档，是没有查询条件下的默认语句。
-```
+
+```shell
 {
     "match_all": {}
 }
 ```
 此查询常用于合并过滤条件。比如说你需要检索所有的邮箱,所有的文档相关性都是相同的，所以得到的 _score 为1
 
-**match 查询**  
-match 查询是一个标准查询，不管你需要全文本查询还是精确查询基本上都要用到它。  
+**match 查询**
+match 查询是一个标准查询，不管你需要全文本查询还是精确查询基本上都要用到它。
 如果你使用 match查询一个全文本字段，它会在真正查询之前用分析器先分析 match 一下查询字符：
-```
+
+```shell
 {
     "match": {
         "tweet": "About Search"
@@ -1050,7 +1068,7 @@ match 查询是一个标准查询，不管你需要全文本查询还是精确�
 }
 ```
 如果用 match 下指定了一个确切值，在遇到数字，日期，布尔值或者 not_analyzed 的字符串时，它将为你搜索你给定的值：  
-```
+```shell
 { "match": { "age": 26 }}
 { "match": { "date": "2014-09-01" }}
 { "match": { "public": true }}
@@ -1058,9 +1076,10 @@ match 查询是一个标准查询，不管你需要全文本查询还是精确�
 ```
 > 提示： 做精确匹配搜索时，你最好用过滤语句，因为过滤语句可以缓存数据。
 
-**multi_match 查询**  
+**multi_match 查询**
 multi_match 查询允许你做 match 查询的基础上同时搜索多个字段：
-```
+
+```shell
 {
     "multi_match": {
         "query": "full text search",
@@ -1069,16 +1088,16 @@ multi_match 查询允许你做 match 查询的基础上同时搜索多个字段�
 }
 ```
 
-**bool 查询**  
+**bool 查询**
 bool 查询与 bool 过滤相似，用于合并多个查询子句。不同的是， bool 过滤可以直接给出是否匹配成功， 而 bool 查询要计算每一个查询子句的 _score （相关性分值）。 
 
-must :: 查询指定文档一定要被包含。  
-must_not :: 查询指定文档一定不要被包含。  
+must :: 查询指定文档一定要被包含。
+must_not :: 查询指定文档一定不要被包含。
 should :: 查询指定文档，有则可以为文档相关性加分。
 
 以下查询将会找到 title 字段中包含 "how to make millions"，并且 "tag" 字段没有被标为spam 。 如果有标识为 "starred" 或者发布日期为2014年之前，那么这些匹配的文档将比同类
 网站等级高：
-```
+```shell
 {
     "bool": {
         "must": { "match": { "title": "how to make millions" }},
@@ -1092,7 +1111,7 @@ should :: 查询指定文档，有则可以为文档相关性加分。
 ```
 > 提示： 如果 bool 查询下没有 must 子句，那至少应该有一个 should 子句。但是如果有 must 子句，那么没有 should 子句也可以进行查询。
 
-```
+```shell
 curl -H "Content-Type:application/json" -XGET 'http://172.16.44.29:9200/megacorp/employee/_search?pretty' -d '
 {
     "query":{
@@ -1105,7 +1124,7 @@ curl -H "Content-Type:application/json" -XGET 'http://172.16.44.29:9200/megacorp
 ```
 
 **查询与过滤条件的合并**  
-```
+```shell
 curl -H "Content-Type:application/json" -XGET 'http://172.16.44.29:9200/megacorp/employee/_search?pretty' -d '
 {
     "query":{
@@ -1125,9 +1144,10 @@ curl -H "Content-Type:application/json" -XGET 'http://172.16.44.29:9200/megacorp
 }'
 ```
 
-**验证查询**  
+**验证查询**
 查询语句可以变得非常复杂，特别是与不同的分析器和字段映射相结合后，就会有些难度。validate API 可以验证一条查询语句是否合法。
-```
+
+```shell
 curl -H "Content-Type:application/json" -XGET 'http://172.16.44.29:9200/megacorp/employee/_validate/query?pretty' -d '
 {
     "query":{
@@ -1150,18 +1170,20 @@ curl -H "Content-Type:application/json" -XGET 'http://172.16.44.29:9200/megacorp
 ## 8.排序
 
 ### 相关性排序
-**字段值排序**  
+**字段值排序**
 字段值默认以顺序排列，而 score 默认以倒序排列。
-```
+
+```shell
 curl -H "Content-Type:application/json" -XGET 'http://172.16.44.29:9200/megacorp/employee/_search?pretty' -d '
 {
     "sort" : {"age":{"order":"desc"}}
 }'
 /*默认排序写法：{"sort":"age"}*/
 ```
-**多级排序**  
+**多级排序**
 如果我们想要合并一个查询语句，并且展示所有匹配的结果集使用第一排序是 age ，第二排序是 _score ：
-```
+
+```shell
 curl -H "Content-Type:application/json" -XGET 'http://172.16.44.29:9200/megacorp/employee/_search?pretty' -d '
 {
     "sort" :[
@@ -1171,16 +1193,17 @@ curl -H "Content-Type:application/json" -XGET 'http://172.16.44.29:9200/megacorp
 }'
 ```
 ### 字符串排序
-**为多值字段字符串排序**   
+**为多值字段字符串排序** 
 在 _source 下相同的字符串上排序两次会造成不必要的资源浪费。 而我们想要的是同一个字段中同时包含这两种索引方式，我们只需要改变索引(index)的mapping即可。 方法是在所有核心字段类型上，使用通用参数 fields 对mapping进行修改。 比如，我们原有mapping如下：
-```
+
+```shell
 "tweet": {
 "type": "text",
 "analyzer": "english"
 }
 ```
 改变后的多值字段mapping如下：
-```
+```shell
     "tweet": { <1>
         "type": "text",
         "analyzer": "english",
@@ -1208,11 +1231,11 @@ curl -H "Content-Type:application/json" -XPUT 'http://172.16.44.29:9200/gb/_mapp
     }
 }'
 ```
-<1> tweet 字段用于全文本的 analyzed 索引方式不变。  
+<1> tweet 字段用于全文本的 analyzed 索引方式不变。
 <2> 新增的 tweet.raw 子字段索引方式是 not_analyzed 。  
 
 现在，在给数据重建索引后，我们既可以使用 tweet 字段进行全文本搜索，也可以用 tweet.raw 字段进行排序：
-```
+```shell
 GET /_search
 {
     "query": {
@@ -1224,8 +1247,9 @@ GET /_search
 }
 ```
 
-**数据字段**  
+**数据字段**
 当你对一个字段进行排序时，ElasticSearch 需要进入每个匹配到的文档得到相关的值。 倒排索引在用于搜索时是非常卓越的，但却不是理想的排序结构。
+
 - 当搜索的时候，我们需要用检索词去遍历所有的文档。
 - 当排序的时候，我们需要遍历文档中所有的值，我们需要做反倒序排列操作。  
 
@@ -1241,8 +1265,8 @@ ElasticSearch中的字段数据常被应用到以下场景：
 毫无疑问，这会消耗掉很多内存，尤其是大量的字符串数据 -- string字段可能包含很多不同的值。值得庆幸的是，内存不足是可以通过横向扩展解决的，我们可以增加更多的节点到集群。
 ## 9.分布式搜索
 
-**搜索选项**  
-preference（偏爱）  
+**搜索选项**
+preference（偏爱）
 preference 参数允许你控制使用哪个分片或节点来处理搜索请求。她接受如下一些参数_primary ， _primary_first ， _local ， _only_node:xyz ，_prefer_node:xyz 和 _shards:2,3 。这些参数在文档搜索偏好（search preference）里有详细描述。  
 
 然而通常最有用的值是一些随机字符串，它们可以避免结果震荡问题（the bouncing resultsproblem）。
@@ -1254,9 +1278,10 @@ preference 参数允许你控制使用哪个分片或节点来处理搜索请求
 
 **search_type（搜索类型）**  
 
-*count（计数）*  
-搜索类型只有一个 query（查询） 的阶段。当不需要搜索结果只需要知道满足查询的document的数量时，可以使用这个查询类型。  
+*count（计数）*
+搜索类型只有一个 query（查询） 的阶段。当不需要搜索结果只需要知道满足查询的document的数量时，可以使用这个查询类型。
 search_type = count被size = 0 代替：
+
 ```
 curl -H "Content-Type:application/json" -XPOST 'http://172.16.44.29:9200/_search?pretty' -d '{
 "query":{"match_all":{}},
@@ -1264,15 +1289,16 @@ curl -H "Content-Type:application/json" -XPOST 'http://172.16.44.29:9200/_search
 }'
 ```
 
-*query_and_fetch（查询并且取回）*  
+*query_and_fetch（查询并且取回）*
 query_and_fetch（查询并且取回） 搜索类型将查询和取回阶段合并成一个步骤。这是一个内部优化选项，当搜索请求的目标只是一个分片时可以使用。  
 
-*dfs_query_then_fetch 和 dfs_query_and_fetch*  
+*dfs_query_then_fetch 和 dfs_query_and_fetch*
 dfs 搜索类型有一个预查询的阶段，它会从全部相关的分片里取回项目频数来计算全局的项目频数。
 
-**scroll(滚屏)**  
+**scroll(滚屏)**
 滚屏可以用来解决深分页带来的内存大量消耗的问题
-```
+
+```shell
 curl -H "Content-Type:application/json" -XPOST 'http://172.16.44.29:9200/_search?scroll=4m&pretty' -d '{
 "query":{"match_all":{}},
 "size":3                                            }'
@@ -1290,7 +1316,7 @@ curl -H "Content-Type:application/json" -XPOST 'http://172.16.44.29:9200/_search
 - 设置项，控制如何动态处理新的字段，例如 analyzer , dynamic_date_formats 和dynamic_templates 。
 - 其他设置，可以同时应用在根对象和其他 object 类型的字段上，例如 enabled ,dynamic 和 include_in_all  
 
-**元数据：_source 字段**  
+**元数据：_source 字段**
 默认情况下，Elasticsearch 用 JSON 字符串来表示文档主 体保存在 _source 字段中。像其他保存的字段一样， _source 字 段也会在写入硬盘前压缩。  
 
 这几乎始终是需要的功能，因为：
@@ -1301,7 +1327,7 @@ curl -H "Content-Type:application/json" -XPOST 'http://172.16.44.29:9200/_search
 - 这样更容易排查错误，因为你可以准确的看到每个文档中包含的内容，而不是只能从一堆 ID 中猜测他们的内容。  
 
 即便如此，存储_source字段还是要占用硬盘空间的。假如上面的理由对你来说不重要，你可以用下面的映射禁用 _source 字段：
-```
+```shell
 PUT /my_index
 {
     "mappings": {
@@ -1321,7 +1347,7 @@ PUT /my_index
 
 
 dynamic 设置可以用在根对象或任何object对象上。你可以将dynamic默认设置为strict，而在特定内部对象上启用它：
-```
+```shell
 PUT /my_index
 {
     "mappings": {
@@ -1422,24 +1448,26 @@ GET /my_index/_mapping/my_type
 - 给多个索引分类（例如， last_three_months ）
 - 给索引的一个子集创建视图  
 
-这里有两种管理别名的途径：_alias用于单个操作，_aliases用于原子化多个操作。  
+这里有两种管理别名的途径：_alias用于单个操作，_aliases用于原子化多个操作。
 开始，我们创建一个索引 my_index_v1 ，然后将别名 my_index 指向它：
-```
+
+```shell
 PUT /my_index_v1 <1>
 PUT /my_index_v1/_alias/my_index <2>
 ```
-<1> 创建索引 my_index_v1 。  
+<1> 创建索引 my_index_v1 。
 <2> 将别名 my_index 指向 my_index_v1 。
 你可以检测这个别名指向哪个索引：
-```
+
+```shell
 GET /*/_alias/my_index
 ```
 或哪些别名指向这个索引：
-```
+```shell
 GET /my_index_v1/_alias/*
 ```
 别名可以指向多个索引，所以我们需要在新索引中添加别名的同时从旧索引中删除它。这个操作需要原子化，所以我们需要用_aliases操作:
-```
+```shell
 POST /_aliases
 {
     "actions": [
@@ -1455,8 +1483,9 @@ POST /_aliases
 
 ## 11.深入分片
 
-**不可变性**  
+**不可变性**
 写入磁盘的倒排索引是不可变的，它有如下好处：
+
 - 不需要锁。如果从来不需要更新一个索引，就不必担心多个程序同时尝试修改。
 - 一旦索引被读入文件系统的缓存(译者:在内存)，它就一直在那儿，因为不会改变。只要文件系统缓存有足够的空间，大部分的读会直接访问内存而不是磁盘。这有助于性能提升。
 - 在索引的声明周期内，所有的其他缓存都可用。它们不需要在每次数据变化了都重建，因为数据不会变。
@@ -1466,7 +1495,7 @@ POST /_aliases
 ### 组合过滤
 **bool过滤器**  
 
-```
+```shell
 curl -H "Content-type:application/json" -XGET 'http://172.16.44.30:9400/_search?pretty' -d '{
     "query":{
         "bool":{
@@ -1478,3 +1507,4 @@ curl -H "Content-type:application/json" -XGET 'http://172.16.44.30:9400/_search?
     }
 }'
 ```
+
