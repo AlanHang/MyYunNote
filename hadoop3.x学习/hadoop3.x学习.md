@@ -551,3 +551,366 @@ yarn queue -status <queue_name>
 
 ![image-20210817195612811](hadoop3.x学习.assets/image-20210817195612811.png)
 
+# Hadoop完全分布式(HA)模式搭建
+
+## 1.集群规划
+
+| hadoop1              | hadoop2              | hadoop3     | hadoop4     | hadoop5     |
+| -------------------- | -------------------- | ----------- | ----------- | ----------- |
+| zookeeper            | zookeeper            | zookeeper   | zookeeper   | zookeeper   |
+| NameNode             | NameNode             |             |             |             |
+| ZKFailoverController | ZKFailoverController |             |             |             |
+| JouralNode           | JouralNode           | JouralNode  | JouralNode  | JouralNode  |
+|                      |                      | DateNode    | DateNode    | DateNode    |
+|                      |                      | NodeManager | NodeManager | NodeManager |
+| ResourceManager      | ResourceManager      |             |             |             |
+
+## 2.准备工作
+
+- 主机名ip地址映射
+
+  ```shell
+  sudo vim /etc/hosts
+  172.16.12.101   hadoop1
+  172.16.12.102   hadoop2
+  172.16.12.103  	hadoop3
+  172.16.12.104   hadoop4
+  172.16.12.105   hadoop5 
+  ```
+
+- 关闭防火墙
+
+  ```shell
+  sudo systemctl stop firewalld
+  sudo systemctl disable firewalld
+  ```
+
+- 禁用selinux
+
+  ```shell
+  sudo vim /etc/selinx/config
+  SELINX=enforcing --> SELINX=disabled
+  ```
+
+- 配置时间同步
+
+  ```shell
+  sudo yum -y install ntp ntpdate 
+  ntpd  ntp.aliyun.com 
+  ```
+
+- 下载zookeeper和hadoop的压缩包(没有jdk记得安装jdk)
+
+  `https://archive.apache.org/dist/hadoop/common/`
+
+  `https://archive.apache.org/dist/zookeeper/`
+
+- 解压文件并配置环境变量,以zookeeper3.4.14和hadoop3.1.3为例
+
+  ```shell
+  tar -zxvf hadoop-3.1.3.tar.gz
+  tar -zxvf zookeeper-3.4.14.tar.gz
+  ```
+
+- 配置环境变量,假设解压后路径分别为/mnt/disk1/hadoop-3.1.3/hadoop-3.1.3和/mnt/disk1/zookeeper-3.4.14/zookeeper-3.4.14
+
+  ```shell
+  sudo vim /etc/profile
+  #或者在/etc/profile.d新建.sh文件,假如为hadoop-env.sh文件
+  vim /etc/profile.d/hadoop-env.sh#
+  export HADOOP_HOME=/mnt/disk1/hadoop-3.1.3/hadoop-3.1.3
+  export PATH=$PATH:$HADOOP_HOME/bin
+  export PATH=$PATH:$HADOOP_HOME/sbin
+  
+  #保存后记得source
+  source /etc/profile
+  #可以查看一下path或者使用hadoop看table是否能补齐
+  echo $PATH
+  ```
+
+## 3.搭建zookeeper
+
+- 复制/mnt/disk1/zookeeper-3.4.14/zookeeper-3.4.14/conf/zoo_sample.cfg 为zoo.cfg
+
+  ```shell
+  cd /mnt/disk1/zookeeper-3.4.14/zookeeper-3.4.14/conf/
+  cp zoo_sample.cfg zoo.cfg
+  ```
+
+- 修改zoo.cfg中的内容
+
+  ```shell
+  vim zoo.cfg
+  dataDir=/mnt/disk1/zookeeper-3.4.14/zk/data
+  dataLogDir=/mnt/disk1/zookeeper-3.4.14/zk/log
+  clientPort=2181
+  server.1=hadoop1:2888:3888 
+  server.2=hadoop2:2888:3888 
+  server.3=hadoop3:2888:3888 
+  server.4=hadoop4:2888:3888 
+  server.5=hadoop5:2888:3888
+  ```
+
+- 保存退出后创建数据目录和日志目录
+
+  ```shell
+  mkdir -p /mnt/disk1/zookeeper-3.4.14/zk/data
+  mkdir -p /mnt/disk1/zookeeper-3.4.14/zk/log
+  ```
+
+- 配置zkId(其他机器分别为2,3,4,5)
+
+  ```shell
+  echo 1 > /mnt/disk1/zookeeper-3.4.14/zk/data/myid
+  ```
+
+## 4.Hadoop配置
+
+- 配置ssh公钥登陆
+
+  在hadoop1-hadoop5上分别执行
+
+  ```shell
+  #生成秘钥,三次回车
+  ssh-keygen -t rsa
+  #将生成的秘钥分别拷贝到所有机器上
+  ssh-copy-id hadoop1
+  ssh-copy-id hadoop2
+  ssh-copy-id hadoop3
+  ssh-copy-id hadoop4
+  ssh-copy-id hadoop5
+  ```
+
+  
+
+- 配置hadoop-env.sh文件
+
+  ```shell
+  vim hadoop-env.sh
+  #指定JAVA_HOME
+  export JAVA_HOME=/opt/soft/jdk1.8.0\_251(可以通过echo $JAVA_HOME查看) 
+  #指定hadoop用户，hadoop3.x之后必须配置(我的用户名就叫hadoop)
+  export HDFS_NAMENODE_USER=hadoop
+  export HDFS_DATANODE_USER=hadoop 
+  export HDFS_ZKFC_USER=hadoop 
+  export HDFS_JOURNALNODE_USER=hadoop
+  export YARN_RESOURCEMANAGER_USER=hadoop 
+  export YARN_NODEMANAGER_USER=hadoop
+  ```
+
+- 配置core-site.xml文件
+
+  ```xml
+  <!--集群名称-->
+  <property> 
+      <name>fs.defaultFS</name> 
+      <value>hdfs://mycluster</value> </property> 
+  <!--临时目录-->
+  <property> 
+      <name>hadoop.tmp.dir</name> 
+      <value>/mnt/disk1/hadoop-3.1.3/hadoop_data</value> 
+  </property>
+  <!--webUI展示时的用户-->
+  <!--<property> 
+      <name>hadoop.http.staticuser.user</name>            
+      <value>hadoop</value> 
+  </property>-->
+  <property>
+      <name>io.file.buffer.size</name>
+      <value>4096</value>
+  </property>
+  <!--高可用依赖的zookeeper的通讯地址-->
+  <property>
+      <name>ha.zookeeper.quorum</name>
+      <value>hadoop1:2181,hadoop2:2181,hadoop3:2181,hadoop4:2181,hadoop5:2181</value>
+  </property>
+  ```
+
+- 配置hdfs-site.xml文件
+
+  ```xml
+  <property>
+      <name>dfs.nameservices</name>
+      <value>mycluster</value>
+  </property>
+  <!--定义hdfs集群中的namenode的ID号-->
+  <property>
+      <name>dfs.ha.namenodes.mycluster</name>
+      <value>nn1,nn2</value>
+  </property>
+  <!--定义namenode的主机名和rpc协议的端口-->
+  <property>
+      <name>dfs.namenode.rpc-address.mycluster.nn1</name>
+      <value>hadoop1:8020</value>
+  </property>
+  <property>
+      <name>dfs.namenode.rpc-address.mycluster.nn2</name>
+      <value>hadoop2:8020</value>
+  </property>
+  <!--定义namenode的主机名和http协议的端口-->
+  <property>
+      <name>dfs.namenode.http-address.mycluster.nn1</name>
+      <value>hadoop1:50070</value>
+  </property>
+  <property>
+      <name>dfs.namenode.http-address.mycluster.nn2</name>
+      <value>hadoop2:50070</value>
+  </property>
+  <!--定义共享edits的url-->
+  <property>
+      <name>dfs.namenode.shared.edits.dir</name>
+      <value>qjournal://hadoop1:8485;hadoop2:8485;hadoop3:8485;hadoop4:8485;hadoop5:8485/ljgk</value>
+  </property>
+  <!--定义hdfs的客户端连接hdfs集群时返回active namenode地址-->
+  <property>
+      <name>dfs.client.failover.proxy.provider.mycluster</name>
+      <value>org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider</value>
+  </property>
+  
+  <!--hdfs集群中两个namenode切换状态时的隔离方法-->
+  <property>
+      <name>dfs.ha.fencing.methods</name>
+      <value>sshfence</value>
+  </property>
+  
+  <!--hdfs集群中两个namenode切换状态时的隔离方法的秘钥-->
+  <property>
+      <name>dfs.ha.fencing.ssh.private-key-files</name>
+      <value>/root/.ssh/id_rsa</value>
+  </property>
+  
+  <!--journalnode集群中用于保存edits文件的目录-->
+  <property>
+      <name>dfs.journalnode.edits.dir</name>
+      <value>/opt/journalnode/data</value>
+  </property>
+  <!--ha的hdfs集群自动切换namenode的开关-->
+  <property>
+      <name>dfs.ha.automatic-failover.enabled</name>
+      <value>true</value>
+  </property>
+  
+  <property>
+      <name>dfs.safemode.threshold.pct</name>
+      <value>1</value>
+  </property>
+  ```
+
+- 配置workers文件
+
+  ```
+  hadoop1
+  hadoop2
+  hadoop3
+  ```
+
+- 配置yarn-site.xml文件
+
+  ```xml
+  <property>
+      <name>yarn.resourcemanager.ha.enabled</name>
+      <value>true</value>
+      <description>Enable RM high-availability</description>
+  </property>
+  <property>
+      <name>yarn.resourcemanager.cluster-id</name>
+      <value>cluster1</value>
+      <description>Name of the cluster</description>
+  </property>
+  <property>
+      <name>yarn.resourcemanager.ha.rm-ids</name>
+      <value>rm1,rm2</value>
+      <description>The list of RM nodes in the cluster when HA is enabled</description>
+  </property>
+   <property>
+      <name>yarn.resourcemanager.hostname.rm1</name>
+      <value>hadoop1</value>
+      <description>The hostname of the rm1</description>
+  </property>
+  <property>
+      <name>yarn.resourcemanager.hostname.rm2</name>
+      <value>hadoop2</value>
+      <description>The hostname of the rm2</description>
+  </property>
+  <property>
+      <name>yarn.resourcemanager.webapp.address.rm1</name>
+      <value>hadoop1:8088</value>
+  </property>
+  <property>
+      <name>yarn.resourcemanager.webapp.address.rm2</name>
+      <value>hadoop2:8088</value>
+  </property>
+  <property>
+      <name>yarn.resourcemanager.zk-address</name>
+      <value>hadoop1:2181,hadoop2:2181,hadoop3:2181,hadoop4:2181,hadoop5:2181</value>
+  </property>
+  <property>
+      <name>yarn.nodemanager.aux-services</name>
+      <value>mapreduce_shuffle</value>
+  </property>
+  <property>
+      <name>yarn.nodemanager.aux-services.mapreduce_shuffle.class</name>
+      <value>org.apache.hadoop.mapred.ShuffleHandler</value>
+  </property>
+  <property>
+      <name>yarn.nodemanager.env-whitelist</name>
+       <value>JAVA_HOME,HADOOP_COMMON_HOME,HADOOP_HDFS_HOME,HADOOP_CONF_DIR,CLASSPATH_PREPEND_DISTCACHE,HADOOP_YARN_HOME,HADOOP_MAPRED_HOME</value>
+  </property>
+  ```
+
+- 配置mapred-site.xml文件
+
+  ```xml
+      <property>
+          <name>mapreduce.framework.name</name>
+          <value>yarn</value>
+      </property>
+      <property>
+          <name>mapreduce.application.classpath</name>
+          <value>
+              /mnt/disk1/hadoop-3.1.3/hadoop-3.1.3/etc/hadoop,
+              /mnt/disk1/hadoop-3.1.3/hadoop-3.1.3/etc/hadoop/common/*,
+              /mnt/disk1/hadoop-3.1.3/hadoop-3.1.3/etc/hadoop/common/lib/*,
+              /mnt/disk1/hadoop-3.1.3/hadoop-3.1.3/etc/hadoop/hdfs/*,
+              /mnt/disk1/hadoop-3.1.3/hadoop-3.1.3/etc/hadoop/hdfs/lib/*,
+              /mnt/disk1/hadoop-3.1.3/hadoop-3.1.3/etc/hadoop/mapreduce/*,
+              /mnt/disk1/hadoop-3.1.3/hadoop-3.1.3/etc/hadoop/mapreduce/lib/*,
+              /mnt/disk1/hadoop-3.1.3/hadoop-3.1.3/etc/hadoop/yarn/*,
+              /mnt/disk1/hadoop-3.1.3/hadoop-3.1.3/etc/hadoop/yarn/lib/*
+          </value>
+  </property>
+  
+  ```
+
+  
+
+## 5.启动
+
+- 启动zookeeper
+
+  ```shell
+  zkServer.sh start
+  ```
+  
+- 启动hadoop
+
+  ```shell
+  #启动五个阶段jn
+  hadoop-daemon.sh start journalnode
+  #格式化一个NameNode并启动
+  hdfs namenode -fromat
+  hadoop-daemon.sh start namenode
+  #另一个NameNode手动同步数据并启动
+  hdfs namenode -bootstrapStandby
+  hadoop-daemon.sh start namenode
+  #初始化zkfc(任意节点)
+  hdfs zkfc -fromatZK
+  #停止hadoop所有进程
+  stop-dfs.sh
+  #全部启动
+  start-all.sh
+  #启动yarn
+  start-yarn.sh
+  ```
+
+  

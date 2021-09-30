@@ -564,8 +564,6 @@
 
 # AOP 面向切面编程
 
-## AOP概念和原理
-
 1. 什么是AOP
 
    - AOP是面向切面(方面)编程，利用AOP可以对业务逻辑的各个部分进行隔离，从而使得业务逻辑各部分之间的耦合度降低，提高程序的可重用性，同时提高了开发效率。
@@ -595,5 +593,145 @@
      - 第二个参数：增强方法所在类实现的接口，支持多个接口；
      - 第三个参数：实现InvacationHandler接口，创建代理对象，写增强的方法。
 
-4. 
+4. AOP操作术语
+
+   - 连接点
+
+     类中可以被增强的方法，这些方法被称为连接点。
+
+   - 切入点
+
+     实际被增强的方法被称为切入点。
+
+   - 通知(增强)
+
+     实际增强的逻辑部分称为通知(增强)
+
+     通知有多种类型：
+
+     - 前置通知
+     - 后置通知
+     - 环绕通知
+     - 异常通知
+     - 最终通知
+
+   - 切面
+
+     是一个动作，指的是把通知应用到切入点的过程。
+
+5. AOP操作(准备)
+
+   - Spring框架中一般基于AspectJ实现AOP操作
+
+     AspectJ不是Spring组成部分，独立的AOP框架，一般把AspectJ和Spring框架一起使用，进行AOP操作。
+
+   - pom依赖
+
+     ```xml
+     <dependency>
+         <groupId>org.springframework</groupId>
+         <artifactId>spring-aop</artifactId>
+         <version>${spring.version}</version>
+     </dependency>
+     
+     <!--aspectJ依赖-->
+     <dependency>
+         <groupId>org.aspectj</groupId>
+         <artifactId>aspectjweaver</artifactId>
+         <version>${aspectj.version}</version>
+     </dependency>
+     <dependency>
+         <groupId>org.aspectj</groupId>
+         <artifactId>aspectjrt</artifactId>
+         <version>${aspectj.version}</version>
+     </dependency>
+     ```
+
+   - 基于AspectJ实现AOP操作
+
+     (1)基于xml配置文件实现
+
+     (2)基于注解方式实现
+
+   - 切入点表达式
+
+     (1)切入点表达式作用：对指定类中的指定方法进行增强。
+
+     (2)语法结构：
+
+     - `execution([权限修饰符][返回类型][类全路径][方法名称][参数列表])`
+
+     - 示例：对com.bonc.TestSpring类中add方法增强
+
+       `execution(* com.bonc.TestSpring.add(..))`权限修饰符可以省略，*代表所有类型，..表示所有参数。
+
+6. 基于AspectJ注解实现
+
+   - 开启注解扫描
+
+   - 使用创建原始类和增强类
+
+   - 在增强类上加@Aspect注解
+
+   - 在spring配置文件中开启aspectj生成代理对象
+
+     ![image-20210922193412705](spring5.assets/image-20210922193412705.png)
+
+   - 配置不同类型的通知
+
+     在增强类中作为通知方法上面添加通知类型的注解，在注解中添加切入点表达式。
+
+     注解类型：
+
+     - @Before
+
+     - @After
+
+     - @AfterReturning
+
+     - @AfterThrowing
+
+     - @Around
+
+       ![image-20210922194025700](spring5.assets/image-20210922194025700.png)
+
+   - 对相同的切入点进行抽取
+
+     ![image-20210922194549827](spring5.assets/image-20210922194549827.png)
+
+   - 有多个增强类增强同一个方法，设置增强类优先级
+
+     在增强类上添加Order注解，Order注解的value值是数值类型，值越小优先级越高，从0开始。
+
+7. 基于AspectJ配置文件实现
+
+   ![image-20210922195540484](spring5.assets/image-20210922195540484.png)
+
+8. 完全使用注解开发
+
+   ![image-20210922195913864](spring5.assets/image-20210922195913864.png)
+
+# 事务操作
+
+1. 事务的概念
+
+   事务是数据库操作最基本单元，逻辑上的一组操作，要么都成功，要么度失败。
+
+2. 事务的四个特性(ACID)
+
+   - 原子性
+   - 一致性
+   - 隔离性
+   - 持久性
+
+3. 事务管理
+
+   - 3.1 Spring进行事务管理的两种方式
+     - 编程式事务管理
+     - 声明式事务管理(常用)
+   - 3.2 声明式事务管理两种方式
+     - 基于注解方式(常用)
+     - 基于xml配置文件方式
+   - 3.3 在Spring进行声明式事务管理，底层使用AOP原理
+   - 
 
