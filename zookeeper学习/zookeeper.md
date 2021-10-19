@@ -346,7 +346,45 @@ zookeeper-jute代码是关于Zookeeper序列化相关源码。
 
 ![image-20211015164526345](zookeeper.assets/image-20211015164526345.png)
 
+## 5.3 服务端初始化源码
 
+![image-20211019160201217](zookeeper.assets/image-20211019160201217.png)
+
+## 5.4 服务端加载数据源码
+
+![image-20211019162958012](zookeeper.assets/image-20211019162958012.png)
+
+## 5.5 选举源码
+
+![image-20211019163855641](zookeeper.assets/image-20211019163855641.png)
+
+选举准备
+
+![image-20211019164219584](zookeeper.assets/image-20211019164219584.png)
+
+zk选举
+
+![image-20211019165806374](zookeeper.assets/image-20211019165806374.png)
+
+## 5.6 Leader和Follower状态同步
+
+![image-20211019171114652](zookeeper.assets/image-20211019171114652.png)
+
+![image-20211019171411620](zookeeper.assets/image-20211019171411620.png)
+
+## 5.7 Leader&&Follower启动
+
+leader启动
+
+![image-20211019174615622](zookeeper.assets/image-20211019174615622.png)
+
+follower启动
+
+![image-20211019174854086](zookeeper.assets/image-20211019174854086.png)
+
+## 5.8 客户端启动
+
+![image-20211019175242181](zookeeper.assets/image-20211019175242181.png)
 
 
 
