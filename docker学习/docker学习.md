@@ -54,10 +54,190 @@ Docker是基于Go语言开发的项目。
 
 # 7.Docker网络原理
 
-# 8.IDEA整合Docker
+三个网络
 
-# 9.Docker Compose
+![image-20220228194028521](docker学习.assets/image-20220228194028521.png)
 
-# 10.Docker Swarm
+```shell
+docker run -d -P --name tomcat01 tomcat
+#查看容器的内部网络地址 ip addr， 发现容器启动的时候会得到一个etho@if7 ip地址，docker自动分配的。如果执行失败，可以使用命令 apt update && apt install -y iproute2 安装网络工具
+docker exec -it tomcat01 ip addr
+```
 
-# 11.CI\CD jenkins
+![image-20220228200021490](docker学习.assets/image-20220228200021490.png)
+
+> 原理
+
+每启动一个docker容器，docker就会给docker容器分配一个ip，只要安装了docker，就会有docker0的网卡，使用桥接模式，使用的技术是evth-pair技术。
+
+主机上的网卡与docker容器中的网卡是成对出现的。
+
+![image-20220302191453037](docker学习.assets/image-20220302191453037.png)
+
+![image-20220302191523486](docker学习.assets/image-20220302191523486.png)
+
+evth-pair 就是一对虚拟设备接口，他们都是成对出现的，一端连着协议，一端彼此相连，正因如此，evth-pair技术被充当一个桥梁，用来连接各种虚拟网络设备的。
+
+![image-20220302192040663](docker学习.assets/image-20220302192040663.png)
+
+所有的容器不指定网络的情况下，都是docker0路由的，docker会给容器分配一个默认的可用ip，B类地址。使用的是linux的桥接模式，宿主机是docker容器的网桥docker0,容器中的所有网络接口都是虚拟的，虚拟网桥转发效率高。
+
+![image-20220302192444239](docker学习.assets/image-20220302192444239.png)
+
+## 7.1 ——link
+
+原理是在容器的host文件中添加link的主机地址。不建议使用。docker0存在的问题，不支持容器名连接服务。
+
+![image-20220302194140653](docker学习.assets/image-20220302194140653.png)
+
+![image-20220302193208986](docker学习.assets/image-20220302193208986.png)
+
+docker查看网络信息
+
+![image-20220302193512566](docker学习.assets/image-20220302193512566.png)
+
+![image-20220302193854118](docker学习.assets/image-20220302193854118.png)
+
+
+
+
+
+## 7.2 自定义网络
+
+> 网络模式
+
+bridge: 桥接(docker默认网络)
+
+none: 不配置网络
+
+host: 和宿主机共享网络
+
+container： 容器网络联通
+
+![image-20220302194639364](docker学习.assets/image-20220302194639364.png)
+
+启动容器时，网络的默认参数为--net bridge ，也就是docker0。
+
+> 创建网络
+
+![image-20220302195053726](docker学习.assets/image-20220302195053726.png)****
+
+自定义网络可以通过服务名ping通网络。
+
+> 网络连通
+
+```	shell 
+docker network connect mynet tomcat01
+
+#没有ping命令时使用 apt update && apt install -y iproute2 && apt install -y net-tools && apt install -y iputils-ping
+```
+
+# 8.Docker Compose
+
+## 8.1 简介
+
+Docker Compose 用来管理容器，定义运行多个容器。作用：批量容器编排。地址https://docs.docker.com/compose/install/
+
+> 官方介绍
+
+Compose is a tool for defining and running multi-container Docker applications. With Compose, you use a ==YAML file==to configure your application’s services. Then, with a single command, you create and start all the services from your configuration. To learn more about all the features of Compose, see [the list of features](https://docs.docker.com/compose/#features).
+
+Compose works in all environments: production, staging, development, testing, as well as CI workflows. You can learn more about each case in [Common Use Cases](https://docs.docker.com/compose/#common-use-cases).
+
+Using Compose is basically a three-step process:
+
+1. Define your app’s environment with a `Dockerfile` so it can be reproduced anywhere.
+2. Define the services that make up your app in `docker-compose.yml` so they can be run together in an isolated environment.
+3. Run `docker compose up` and the [Docker compose command](https://docs.docker.com/compose/cli-command/) starts and runs your entire app. You can alternatively run `docker-compose up` using the docker-compose binary.
+
+
+
+> Compose
+
+Compose 是Docker官方的开源项目，需要安装！
+
+`Dockerfile`可以让程序在任何地方运行。
+
+Compose文件
+
+```yaml
+version: "3.9"  # optional since v1.27.0
+services:
+  web:
+    build: .
+    ports:
+      - "8000:5000"
+    volumes:
+      - .:/code
+      - logvolume01:/var/log
+    links:
+      - redis
+  redis:
+    image: redis
+volumes:
+  logvolume01: {}
+```
+
+Compose中的重要概念。
+
+- 服务 services,容器、应用。
+- 项目 project。一组关联的容器。
+
+## 8.2 安装
+
+```shell
+# 1.获取地址
+# 官方地址
+sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose 
+# 国内地址
+sudo curl -L "https://get.daocloud.io/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+# 2. 赋权
+sudo chmod +x docker-compose
+
+# 如果安装后命令docker-compose失败，请检查您的路径。您还可以/usr/bin在路径中创建指向或任何其他目录的符号链接。
+ sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
+```
+
+![image-20220303191028468](docker学习.assets/image-20220303191028468.png)
+
+## 8.3 流程
+
+1. 创建网络
+2. 执行Docker-compose.yml
+3. 启动服务
+
+**默认规则：**
+
+- 自动下载yml脚本中的docker镜像。
+- 默认的服务名 `文件名_服务名_num`,num代表副本数量。
+- 网络规则 `文件名_default`（项目中的网络都在同一个网络下，可以通过域名访问）
+
+停止： docker-compose stop/down 需要在文件夹下。
+
+## 8.4 yaml编写规则
+
+https://docs.docker.com/compose/compose-file/compose-file-v3/
+
+```yaml
+# 总共三层
+version:'' # 版本
+service: # 服务
+  服务1: web
+    # 服务配置
+    image
+    build
+    network
+  服务1: web
+    # 服务配置
+    image
+    build
+    network
+#其他配置
+volumes:
+networks:
+configs:
+```
+
+# 9.Docker Swarm
+
+# 10.CI\CD jenkins

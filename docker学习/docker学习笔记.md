@@ -45,7 +45,7 @@ Docker 包括三个基本概念:
 - 仓库（Repository）：仓库可看成一个代码控制中心，用来保存镜像。  
 
 Docker 使用客户端-服务器 (C/S)架构模式，使用远程API来管理和创建Docker容器。Docker 容器通过 Docker 镜像来创建。容器与镜像的关系类似于面向对象编程中的对象与类。
-![image](https://www.runoob.com/wp-content/uploads/2016/04/576507-docker1.png)
+![image-20220228193355398](docker学习笔记.assets/image-20220228193355398.png)
 
 | 概念 | 说明 |
 | ---- | ---- |
@@ -105,6 +105,61 @@ Docker 运行过程也就是去仓库把镜像拉到本地，然后用一条命�
 - 虚拟机 (VM) 是一个物理硬件层抽象，用于将一台服务器变成多台服务器。 管理程序允许多个 VM 在一台机器上运行。每个VM都包含一整套操作系统、一个或多个应用、必要的二进制文件和库资源，因此 占用大量空间 。而且 VM  启动也十分缓慢 。
 
 ## Docker 安装教程
+
+### linux CentOS 在线安装
+
+```shell
+1.卸载旧的版本  
+ sudo yum remove docker docker-client docker-client-latest docker-common docker-latest docker-latest-logrotate docker-logrotate docker-engine
+2.使用yum安装
+ sudo yum install -y yum-utils
+3.设置仓库
+#国外的仓库地址
+ sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+#阿里云的仓库地址
+ sudo yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+--(可选)更新yum索引
+ sudo yum makecache fast
+4.安装docker相关的包 docker-ce 社区版 ee 企业版
+ sudo yum install docker-ce docker-ce-cli containerd.io
+--(可选)安装其他版本
+ yum list docker-ce --showduplicates | sort -r
+通过其完全限定的包名称安装特定版本，即包名称 ( docker-ce) 加上版本字符串（第 2 列），从第一个冒号 ( :) 开始，一直到第一个连字符，用连字符 ( -)分隔。例如，docker-ce-18.09.1。
+ sudo yum install docker-ce-<VERSION_STRING> docker-ce-cli-<VERSION_STRING> containerd.io
+5.启动docker
+ sudo systemctl start docker
+6.判断docker是否安装成功
+ docker version (docker info)
+7.测试hello world
+ sudo docker run hello-world
+```
+
+### linux CentOS rpm 离线安装docker
+
+```shell
+使用rpm包安装docker,有yum或者rpm命令
+1.前往https://download.docker.com/linux/centos/ 并选择您的 CentOS 版本。然后浏览x86_64/stable/Packages/ 并下载.rpm要安装的 Docker 版本的文件。
+2.安装 Docker Engine，将下面的路径更改为您下载 Docker 包的路径。
+sudo yum install /path/to/package.rpm（docker-ce docker-ce-cli containerd.io docker-ce-rootless docker-scan-plugin）
+3.启动 Docker。
+sudo systemctl start docker
+4.判断docker是否安装成功
+docker version (docker info)
+
+```
+
+![image-20220228193131027](docker学习笔记.assets/image-20220228193131027.png)
+
+```shell
+卸载
+1.卸载 Docker 引擎、CLI 和 Containerd 软件包：
+ sudo yum remove docker-ce docker-ce-cli containerd.io
+2.主机上的映像、容器、卷或自定义配置文件不会自动删除。要删除所有映像、容器和卷：
+ sudo rm -rf /var/lib/docker
+ sudo rm -rf /var/lib/containerd
+```
+
+
 
 ### linux CentOS 离线安装docker 一
 
