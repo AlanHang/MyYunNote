@@ -856,6 +856,21 @@ yarn queue -status <queue_name>
       <name>yarn.nodemanager.env-whitelist</name>
        <value>JAVA_HOME,HADOOP_COMMON_HOME,HADOOP_HDFS_HOME,HADOOP_CONF_DIR,CLASSPATH_PREPEND_DISTCACHE,HADOOP_YARN_HOME,HADOOP_MAPRED_HOME</value>
   </property>
+  <!--配置yarn的最大container内存大小-->
+  <property>
+      <name>yarn.scheduler.maximum-allocation-mb</name>
+      <value>10240</value>
+  </property>
+  <!--配置yarn的每个节点内存大小-->
+  <property>
+      <name>yarn.nodemanager.resource.memory-mb</name>
+      <value>184320</value>
+  </property>
+  <!--配置yarn的的每个节点核数大小-->
+  <property>
+      <name>yarn.nodemanager.resource.cpu-vcores</name>
+      <value>24</value>
+  </property>
   ```
 
 - 配置mapred-site.xml文件
@@ -896,10 +911,10 @@ yarn queue -status <queue_name>
 
   ```shell
   #启动五个阶段jn
-  hadoop-daemon.sh start journalnode
+  hadoop-daemon.sh start journalnode (hdfs --daemon start journalnode)
   #格式化一个NameNode并启动
   hdfs namenode -fromat
-  hadoop-daemon.sh start namenode
+  hadoop-daemon.sh start namenode (hdfs --daemon start namenode)
   #另一个NameNode手动同步数据并启动
   hdfs namenode -bootstrapStandby
   hadoop-daemon.sh start namenode
@@ -910,7 +925,9 @@ yarn queue -status <queue_name>
   #全部启动
   start-all.sh
   #启动yarn
-  start-yarn.sh
+  start-yarn.sh 
+  #单独启动yarn的resourcemanager节点
+yarn --daemon start resourcemanager
   ```
-
+  
   

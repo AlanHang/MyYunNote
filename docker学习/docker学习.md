@@ -240,4 +240,57 @@ configs:
 
 # 9.Docker Swarm
 
+网址：https://docs.docker.com/engine/swarm/
+
+## 9.1 工作模式
+
+Docker Engine 1.12 introduces swarm mode that enables you to create a cluster of one or more Docker Engines called a swarm. A swarm consists of one or more nodes: physical or virtual machines running Docker Engine 1.12 or later in swarm mode.
+
+There are two types of nodes: [**managers**](https://docs.docker.com/engine/swarm/how-swarm-mode-works/nodes/#manager-nodes) and [**workers**](https://docs.docker.com/engine/swarm/how-swarm-mode-works/nodes/#worker-nodes).
+
+![image-20220307191124099](docker学习.assets/image-20220307191124099.png)
+
+>  docker 自带swarm的信息
+
+![image-20220307191416232](docker学习.assets/image-20220307191416232.png)
+
+> 初始化主节点：
+
+![image-20220307191657435](docker学习.assets/image-20220307191657435.png)
+
+> docker 生成token令牌
+
+```shell
+docker swarm join manager
+docker swarm join worker
+```
+
+
+
+## 9.2 Raft协议
+
+Raft协议：保证大多数节点存活在可以用，集群至少大于三台！
+
+## 9.3 概念
+
+**swarm**
+
+集群的管理和编号，docker可以初始化一个swarm集群，其他节点可以加入。（manager、worker)
+
+**Node**
+
+就是一个docker节点，多个节点就组成一个网络集群。
+
+**Service**
+
+任务，可以在管理节点或者工作节点来运行。
+
+**Task**
+
+容器内的命令，细节任务。
+
+![image-20220307194611256](docker学习.assets/image-20220307194611256.png)
+
+> docker Stack/docker Secret/docker Config 
+
 # 10.CI\CD jenkins
