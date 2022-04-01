@@ -476,3 +476,804 @@ kubectl expose deployment nginx --port=80 --type=NodePort
 
 ![image-20220318175829937](kubernetes.assets/image-20220318175829937.png)
 
+# 3. 资源管理
+
+## 3.1 资源管理介绍
+
+![image-20220321192238157](kubernetes.assets/image-20220321192238157.png)
+
+![image-20220321192350964](kubernetes.assets/image-20220321192350964.png)
+
+## 3.2 YAML语言介绍
+
+![image-20220321192647208](kubernetes.assets/image-20220321192647208.png)
+
+![image-20220321193047641](kubernetes.assets/image-20220321193047641.png)
+
+![image-20220321193330746](kubernetes.assets/image-20220321193330746.png)
+
+> yaml 中 三个‘-’(---)表示为两个文件
+
+## 3.3 资源管理方式
+
+![image-20220321193509648](kubernetes.assets/image-20220321193509648.png)
+
+### 3.3.1 命令式对象管理
+
+![image-20220321194057535](kubernetes.assets/image-20220321194057535.png)
+
+**command 操作** 
+
+> 通过kubectl --help查看
+
+![image-20220321194443699](kubernetes.assets/image-20220321194443699.png)
+
+![image-20220321194524935](kubernetes.assets/image-20220321194524935.png)
+
+**资源类型**
+
+> 通过kubectl api-resource 查看
+
+![image-20220321194825651](kubernetes.assets/image-20220321194825651.png)
+
+![image-20220321194907946](kubernetes.assets/image-20220321194907946.png)
+
+### 3.3.2 命令式对象配置
+
+![image-20220321195427397](kubernetes.assets/image-20220321195427397.png)
+
+### 3.3.3 声明式对象配置
+
+![image-20220321195646171](kubernetes.assets/image-20220321195646171.png)
+
+![image-20220321195802304](kubernetes.assets/image-20220321195802304.png)
+
+# 4. 实战入门
+
+## 4.1 Namespace
+
+![image-20220321200101760](kubernetes.assets/image-20220321200101760.png)
+
+![image-20220321200154441](kubernetes.assets/image-20220321200154441.png)
+
+ ![image-20220322192344308](kubernetes.assets/image-20220322192344308.png)
+
+## 4.2 Pod
+
+![image-20220322192449478](kubernetes.assets/image-20220322192449478.png)
+
+![image-20220322192946349](kubernetes.assets/image-20220322192946349.png)
+
+![image-20220322193823154](kubernetes.assets/image-20220322193823154.png)
+
+## 4.3 Label
+
+![image-20220322194311564](kubernetes.assets/image-20220322194311564.png)
+
+![image-20220322194426089](kubernetes.assets/image-20220322194426089.png)
+
+![image-20220322194531488](kubernetes.assets/image-20220322194531488.png)
+
+![image-20220322195059471](kubernetes.assets/image-20220322195059471.png)
+
+## 4.4 Deployment
+
+![image-20220322195320742](kubernetes.assets/image-20220322195320742.png)
+
+![image-20220322195513794](kubernetes.assets/image-20220322195513794.png)
+
+```shell
+# 查看详细信息
+kubectl describe deployment nginx -n dev
+# 删除
+kubectl delete deployment nginx -n dev
+```
+
+![image-20220322195845074](kubernetes.assets/image-20220322195845074.png)
+
+## 4.5 Service
+
+![image-20220322200104193](kubernetes.assets/image-20220322200104193.png)
+
+**创建集群内部可访问的Service**
+
+![image-20220323191658240](kubernetes.assets/image-20220323191658240.png)
+
+**创建集群外部可访问的Service**
+
+![image-20220323191844832](kubernetes.assets/image-20220323191844832.png)
+
+```shell
+#删除service
+kubectl delete svc svc-nginx-1 -n dev
+```
+
+![image-20220323192048347](kubernetes.assets/image-20220323192048347.png)
+
+# 5. Pod详解
+
+## 5.1 Pod介绍
+
+### 5.1.1 Pod结构
+
+![image-20220323192416622](kubernetes.assets/image-20220323192416622.png)
+
+### 5.1.2 Pod定义
+
+```yaml
+apiVersion: v1 #必选，版本号
+
+```
+
+![image-20220323194046281](kubernetes.assets/image-20220323194046281.png)
+
+![image-20220323194330341](kubernetes.assets/image-20220323194330341.png)
+
+## 5.2 Pod配置
+
+![image-20220323195125844](kubernetes.assets/image-20220323195125844.png)
+
+### 5.2.1 基本配置
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-base
+  namespace: dev
+  labels:
+    user: zhenghang
+spec:
+  containers:
+    - name: nginx
+      image: nignx:1.17.1
+    - name: busybox
+      image: busybox:1.30
+```
+
+### 5.2.2 镜像拉取
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-base
+  namespace: dev
+  labels:
+    user: zhenghang
+spec:
+  containers:
+    - name: nginx
+      image: nignx:1.17.1
+    - name: busybox
+      image: busybox:1.30
+```
+
+![image-20220323200027919](kubernetes.assets/image-20220323200027919.png)
+
+### 5.2.3 启动命令
+
+![image-20220324194204901](kubernetes.assets/image-20220324194204901.png)
+
+![image-20220324194426960](kubernetes.assets/image-20220324194426960.png)
+
+### 5.2.4 环境变量
+
+```yaml
+apiVersion: v1 #必选，版本号，例如v1
+kind: Pod
+metadata:
+  name: pod-base
+  namespace: dev
+  labels:
+    user: zhenghang
+spec:
+  containers:
+    - name: nginx
+      image: nignx:1.17.1
+    - name: busybox
+      image: busybox:1.30
+      command:
+        - "/bin/bash"
+        - "-c"
+        - "while true;do /bin/echo $(date +%T);sleep 60;done;"
+      env:
+        - name: "username"
+          value: "admin"
+        - name: "password"
+          value: "123456"
+```
+
+![image-20220324195052075](kubernetes.assets/image-20220324195052075.png)
+
+### 5.2.5 端口设置
+
+![image-20220324195802113](kubernetes.assets/image-20220324195802113.png)
+
+```yaml
+apiVersion: v1 #必选，版本号，例如v1
+kind: Pod
+metadata:
+  name: pod-base
+  namespace: dev
+  labels:
+    user: zhenghang
+spec:
+  containers:
+    - name: nginx
+      image: nignx:1.17.1
+      ports:
+        - name: nginx-port
+          containerPort: 80
+          protocol: TCP
+```
+
+### 5.2.6 资源配置
+
+![image-20220324200153219](kubernetes.assets/image-20220324200153219.png)
+
+```yaml
+apiVersion: v1 #必选，版本号，例如v1
+kind: Pod
+metadata:
+  name: pod-base
+  namespace: dev
+  labels:
+    user: zhenghang
+spec:
+  containers:
+    - name: nginx
+      image: nignx:1.17.1
+      resources:
+        limits:
+          cpu: "2" #单位是core数
+          memory: "10Gi"
+        requests:
+          cpu: "1"
+          memory : "10Mi"
+```
+
+## 5.3 Pod生命周期
+
+pod对象从创建至终主要包括下面的过程：
+
+- pod创建过程
+- 运行初始化容器过程
+- 运行主容器过程
+  - 容器启动后钩子(post start)、容器终止前钩子(pre stop)
+  - 容器的存活性探测(liveness probe)、就绪性探测（readliness probe)
+- pod终止过程
+
+在整个生命周期中，pod会出现五种状态（相位）：
+
+- 挂起（Pending）：apiserver已经创建了pod资源对象，但它尚未被调度完成或者任处于下载镜像的过程中
+- 运行中（Running）：pod已经被调度至某节点，并且所有容器都已经被kubelet创建完成
+- 成功（Successed）：pod中的所有容器都已经成功终止并且不会被重启
+- 失败（Failed）：所有容器都已经终止，但至少有一个容器终止失败，即容器返回了非0值的退出状态
+- 未知（Unknown）：apiserver无法正常获取到pod对象的状态信息，通常有网络通信失败所导致
+
+![image-20220329192948203](kubernetes.assets/image-20220329192948203.png)
+
+### 5.3.1 创建和终止
+
+pod创建过程
+
+![image-20220329192203314](kubernetes.assets/image-20220329192203314.png)
+
+pod终止过程
+
+![image-20220329192759144](kubernetes.assets/image-20220329192759144.png)
+
+### 5.3.2 初始化容器
+
+![image-20220329193030784](kubernetes.assets/image-20220329193030784.png)
+
+```yaml
+# 初始化容器使用initContainer
+apiVersion: v1 #必选，版本号，例如v1
+kind: Pod
+metadata:
+  name: pod-base
+  namespace: dev
+  labels:
+    user: zhenghang
+spec:
+  containers:
+    - name: nginx
+      image: nignx:1.17.1
+      resources:
+        limits:
+          cpu: "2" #单位是core数
+          memory: "10Gi"
+        requests:
+          cpu: "1"
+          memory : "10Mi"
+  initContainers:
+    - name: test-mysql
+      image: busybox:1.30
+      command:
+        - ['sh','-c','util ping 192.168.109.201 -c 1; do echo waitting for mysql...;sleep 2;done;']
+    - name: test-redis
+      image: busybox:1.30
+      command:
+        - ['sh','-c','util ping 192.168.109.202 -c 1; do echo waitting for mysql...;sleep 2;done;']
+```
+
+### 5.3.3 钩子函数
+
+![image-20220329193802368](kubernetes.assets/image-20220329193802368.png)
+
+钩子处理器支持使用下面三种方式定义动作：
+
+- Exec 命令：在容器内执行一次命令
+
+  ```yaml
+  lifecycle:
+   postStart:
+    exec:
+     command:
+      - cat
+      - /tmp/healthy
+  ```
+
+  
+
+- TCPSocket：在当前容器尝试访问指定的socket
+
+  ```yaml
+  lifecycle:
+   postStart:
+    tcpSocket:
+     port: 8080
+  ```
+
+  
+
+- HTTPGet: 在当前容器中向某URL发起http请求
+
+  ```yaml
+  lifecycle:
+   postStart:
+    httpGet:
+     port: 80 #端口号
+     path: / #URL地址
+     host: 192.168.109.100 #主机地址
+     scheme: HTTP #支持的协议，http或者https
+  ```
+
+![image-20220329194540787](kubernetes.assets/image-20220329194540787.png)
+
+### 5.3.4 容器探测
+
+![image-20220329195144819](kubernetes.assets/image-20220329195144819.png)
+
+探针支持使用下面三种方式定义动作：
+
+- Exec 命令：在容器内执行一次命令,如果命令执行的退出码为0，则认为程序正常，否则不正常。
+
+  ```yaml
+  lifecycle:
+   livenessProbe:
+    exec:
+     command:
+      - cat
+      - /tmp/healthy
+  ```
+
+  
+
+- TCPSocket：在当前容器尝试访问指定的socket，如果能够建立这条连接，则认为程序正常，否则不正常。
+
+  ```yaml
+  lifecycle:
+   livenessProbe:
+    tcpSocket:
+     port: 8080
+  ```
+
+  
+
+- HTTPGet: 在当前容器中向某URL发起http请求，如果返回的状态码状态在200和399之间，则认为程序正常，否则不正常。
+
+  ```yaml
+  lifecycle:
+   livenessProbe:
+    httpGet:
+     port: 80 #端口号
+     path: / #URL地址
+     host: 192.168.109.100 #主机地址
+     scheme: HTTP #支持的协议，http或者https
+  ```
+
+
+
+![image-20220329195517772](kubernetes.assets/image-20220329195517772.png)
+
+![image-20220329200529339](kubernetes.assets/image-20220329200529339.png)
+
+### 5.3.5 重启策略
+
+![image-20220330192038805](kubernetes.assets/image-20220330192038805.png)
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-restartpolicy
+  namespace: dev
+spec:
+  containers:
+    - name: nginx
+      image: nginx:1.17.1
+      ports:
+        - containerPort: 80
+          name: nginx-port
+      livenessProbe:
+        httpGet:
+          port: 80
+          scheme: HTTP
+          path: /hello
+  restartPolicy: Never
+```
+
+## 5.4 Pod调度
+
+![image-20220330193026801](kubernetes.assets/image-20220330193026801.png)
+
+### 5.4.1 定向调度
+
+定向调度，指的是利用在pod上声明nodeName或者nodeSelector，以此将pod调度到期望的node节点。注意，这里的调度是强制的，这就意味着即使要调度的目标Node不存在，也会想上面进行调度，只不多pod运行失败而已。
+
+**NodeName**
+
+NameNode用于强制约束将Pod调度到指定的NameNode节点。这种方式，其实是直接跳过Scheduler的调度逻辑，直接将Pod调度到指定名称的节点。
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-restartpolicy
+  namespace: dev
+spec:
+  containers:
+    - name: nginx
+      image: nginx:1.17.1
+      ports:
+        - containerPort: 80
+          name: nginx-port
+  nodeName: node1
+```
+
+**NodeSelector**
+
+NodeSelector用于将pod调度到添加了指定标签的node节点上。它是通过kubernetes的label-selector机制实现的，也就是说，在pod创建之前，会由scheduler使用matchNodeSelector调度策略进行label匹配，找出目标node，然后将pod调度到目标节点，该匹配则是强制约束。
+
+1.首先分别为node节点添加标签
+
+```shell
+kubectl label nodes node1 nodeenv=pro
+kubectl label nodes node1 nodeenv=test
+```
+
+2.yaml文件
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-restartpolicy
+  namespace: dev
+spec:
+  containers:
+    - name: nginx
+      image: nginx:1.17.1
+      ports:
+        - containerPort: 80
+          name: nginx-port
+  nodeSelector: 
+    nodeenv: pro
+```
+
+### 5.4.2 亲和性调度
+
+![image-20220330194248119](kubernetes.assets/image-20220330194248119.png)
+
+**NodeAffinity**
+
+![image-20220330194757335](kubernetes.assets/image-20220330194757335.png)
+
+```yaml
+#requiredDuringSchedulingIgnoredDuringExecution
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-restartpolicy
+  namespace: dev
+spec:
+  containers:
+    - name: nginx
+      image: nginx:1.17.1
+      ports:
+        - containerPort: 80
+          name: nginx-port
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: nodedev
+                operator: In
+                values:
+                  - 'xxx'
+                  - 'yyy'
+```
+
+```yaml
+#preferredDuringSchedulingIgnoredDuringExecution
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-restartpolicy
+  namespace: dev
+spec:
+  containers:
+    - name: nginx
+      image: nginx:1.17.1
+      ports:
+        - containerPort: 80
+          name: nginx-port
+  affinity:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 1
+          preference:
+            - matchExpressions:
+                - key: nodedev
+                  operator: In
+                  values:
+                    - 'xxx'
+                    - 'yyy'
+```
+
+![image-20220330200016252](kubernetes.assets/image-20220330200016252.png)
+
+**podAffinity**
+
+![image-20220330200144063](kubernetes.assets/image-20220330200144063.png)
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-restartpolicy
+  namespace: dev
+spec:
+  containers:
+    - name: nginx
+      image: nginx:1.17.1
+      ports:
+        - containerPort: 80
+          name: nginx-port
+  affinity:
+    podAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchExpressions:
+              - key: poddev
+                operator: In
+                values:
+                  - 'xxx'
+                  - 'yyy'
+          topologyKey: kubernetes.io/hostname
+```
+
+**podAntiAffinity**
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-restartpolicy
+  namespace: dev
+spec:
+  containers:
+    - name: nginx
+      image: nginx:1.17.1
+      ports:
+        - containerPort: 80
+          name: nginx-port
+  affinity:
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchExpressions:
+              - key: poddev
+                operator: In
+                values:
+                  - 'xxx'
+                  - 'yyy'
+          topologyKey: kubernetes.io/hostname
+```
+
+### 5.4.3 污点和容忍
+
+![image-20220331192324553](kubernetes.assets/image-20220331192324553.png)
+
+```shell
+#设置污点
+kubectl taint nodes node1 key=value:effect
+
+#去除污点
+kubectl taint nodes node1 key:effect-
+
+#去除所有
+kubectl taint nodes node1 key-
+```
+
+演示污点效果：
+
+1. 准备节点node1(为了演示效果，暂停node2节点)
+2. 为node1设置一个污点：`tag=zhenghang:PreferNoSchedule`;然后创建pod1（可以创建pod1）
+3. 修改node1节点设置一个污点 `tag=zhenghang:NoSchedule`;然后创建pod2(pod1正常，pod2失败)
+4. 修改node1节点设置一个污点 `tag=zhenghang:NoExecute`;(pod1失败，pod3失败)
+
+> 使用kubeadm搭建的集群，默认就会给master节点添加一个污点标记，所以pod就不会调度到master节点上
+
+![image-20220331193336722](kubernetes.assets/image-20220331193336722.png)
+
+![image-20220331193634978](kubernetes.assets/image-20220331193634978.png)
+
+# 6. Pod控制器
+
+## 6.1 Pod控制器介绍
+
+![image-20220331194213501](kubernetes.assets/image-20220331194213501.png)
+
+![image-20220331194344057](kubernetes.assets/image-20220331194344057.png)
+
+## 6.2 ReplicaSet(RS)
+
+![image-20220331194606303](kubernetes.assets/image-20220331194606303.png)
+
+ReplicaSet的资源清单文件：
+
+![image-20220331195107834](kubernetes.assets/image-20220331195107834.png)
+
+![image-20220331195332784](kubernetes.assets/image-20220331195332784.png)
+
+```yaml
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: pc-replicaset
+  namespace: dev
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx-pod
+  template:
+    metadata:
+      labels:
+        app: nginx-pod
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:1.17.1
+```
+
+## 6.3 Deployment(Deploy)
+
+![image-20220401191000137](kubernetes.assets/image-20220401191000137.png)
+
+![image-20220401191332263](kubernetes.assets/image-20220401191332263.png)
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pc-deployment
+  namespace: dev
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx-pod
+  template:
+    metadata:
+      labels:
+        app: nginx-pod
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:1.17.1
+```
+
+![image-20220401191557412](kubernetes.assets/image-20220401191557412.png)
+
+> 扩缩容
+
+```shell
+# 方式1，使用命令行
+kubectl scale deploy pc-deployment --replicas=5 -n dev
+
+#方式二，修改deployment的副本数量，修改spec:replicas:4即可
+kubectl edit deploy pc-deployment -n dev
+```
+
+>  镜像更新
+
+![image-20220401192159034](kubernetes.assets/image-20220401192159034.png)
+
+**重建更新**
+
+1. 编辑pc-deployment.yaml 在spec节点下添加更新策略
+
+   ```yaml
+   spec:
+    startegy:
+     type: Recreate
+   ```
+
+2. 创建deployment验证
+
+   ```shell
+   #变更镜像
+   kubectl set image deployment pc-deployment nginx=nginx:1.17.2 -n dev
+   
+   #观察升级
+   kubectl get pods -n dev -w
+   ```
+
+**滚动更新**
+
+1. 编辑pc-deployment.yaml 在spec节点下添加更新策略
+
+   ```yaml
+   spec:
+     strategy:
+       type: RollingUpdate
+       rollingUpdate:
+         maxUnavailable: 25%
+         maxSurge: 25%
+   ```
+
+2. 创建deployment验证
+
+   ```shell
+   #变更镜像
+   kubectl set image deployment pc-deployment nginx=nginx:1.17.3 -n dev
+   
+   #观察升级
+   kubectl get pods -n dev -w
+   ```
+
+滚动更新过程：
+
+![image-20220401192803426](kubernetes.assets/image-20220401192803426.png)
+
+![image-20220401192928328](kubernetes.assets/image-20220401192928328.png)
+
+> 版本回退
+
+![image-20220401193656929](kubernetes.assets/image-20220401193656929.png)
+
+![image-20220401194036600](kubernetes.assets/image-20220401194036600.png)
+
+如果使用rollout history 查看的第二行记录为`<none>`,则说明创建deployment时没有使用`--record`参数,完整命令为`kubectl deploy -f pc-deployment.yaml --record`
+
+> 金丝雀发布
+
+![image-20220401195010147](kubernetes.assets/image-20220401195010147.png)
+
+![image-20220401195118601](kubernetes.assets/image-20220401195118601.png)
+
+```shell
+# 删除deployment
+kubectl delete -f pc-deployment.yaml
+```
+
+## 6.4 Horizontal Pod Autoscaler(HPA)
+
+![image-20220401195854688](kubernetes.assets/image-20220401195854688.png)
+
