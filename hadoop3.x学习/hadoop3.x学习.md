@@ -913,13 +913,13 @@ yarn queue -status <queue_name>
   #启动五个阶段jn
   hadoop-daemon.sh start journalnode (hdfs --daemon start journalnode)
   #格式化一个NameNode并启动
-  hdfs namenode -fromat
+  hdfs namenode -format
   hadoop-daemon.sh start namenode (hdfs --daemon start namenode)
   #另一个NameNode手动同步数据并启动
   hdfs namenode -bootstrapStandby
-  hadoop-daemon.sh start namenode
+  hadoop-daemon.sh start namenode(hdfs --daemon start namenode)
   #初始化zkfc(任意节点)
-  hdfs zkfc -fromatZK
+  hdfs zkfc -formatZK
   #停止hadoop所有进程
   stop-dfs.sh
   #全部启动
@@ -928,6 +928,9 @@ yarn queue -status <queue_name>
   start-yarn.sh 
   #单独启动yarn的resourcemanager节点
 yarn --daemon start resourcemanager
+  
+  #启动JobHistoryServer的方法
+  mr-jobhistory-daemon.sh start historyserver(mapred --daemon start)
   ```
   
   

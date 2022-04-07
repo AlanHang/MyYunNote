@@ -1277,3 +1277,100 @@ kubectl delete -f pc-deployment.yaml
 
 ![image-20220401195854688](kubernetes.assets/image-20220401195854688.png)
 
+1. 安装metrics-server
+
+   metrics-server可以用来收集集群中的资源使用情况。
+
+   ```shell
+   #安装git
+   yum -y install git
+   #获取metrics-server，注意使用的版本
+   git clone -b v0.3.6 https://github.com/kubernetes-incubator/metrics-server
+   #修改deployment，注意修改的是镜像额初始化参数,这个路径为gitclone的路径
+   cd /root/metrics-server/deploy/1.8+/
+   #按照图中添加下面选项
+   vim metrics-server-deployment.yaml
+   
+   hostNetwork: true #在spec中添加
+   registry.cn-hangzhou.aliyuncs.com/google_containers/metrics-server-amd64:v0.3.6
+   - --kubelet-insecure-tls
+   - --kubelet-preferred-address-types=InternalIp,Hostname,InternalDNS,ExternalDNS,ExternalIP
+   ```
+
+   ![image-20220406193435145](kubernetes.assets/image-20220406193435145.png)
+
+   ```shell
+   #部署应用
+   [root@master 1.8+]kubectl apply -f ./
+   #查看pod运行情况
+   [root@master 1.8+] kubectl get pod -n kube-system
+   NAME                              READY   STATUS    RESTARTS   AGE
+   metrics-server-855788858b-g6nrl   1/1     Running   0          105s
+   #使用kubectl top node 查看资源使用情况，需要等待一会儿再执行
+   [root@master 1.8+] kubectl top node
+   NAME     CPU(cores)   CPU%   MEMORY(bytes)   MEMORY%   
+   master   105m         5%     1080Mi          62%       
+   node1    30m          1%     440Mi           25%       
+   node2    30m          1%     364Mi           21% 
+   [root@master 1.8+] kubectl top pod -n kube-system
+   NAME                              CPU(cores)   MEMORY(bytes)   
+   coredns-6955765f44-c5fpq          3m           13Mi            
+   coredns-6955765f44-zg75m          3m           18Mi            
+   etcd-master                       13m          117Mi           
+   kube-apiserver-master             26m          316Mi           
+   kube-controller-manager-master    11m          68Mi
+   ```
+
+2. 准备deployment和service
+
+   为了操作简单，直接使用命令
+
+   ```shell
+   #创建deployment
+   [root@master 1.8+]# kubectl run nginx --image=nginx:1.17.1 --requests=cpu=100m -n dev
+   #创建service
+   [root@master 1.8+]# kubectl expose deployment nginx --type=NodePort --port=80 -n dev
+   #查看
+   [root@master 1.8+]# kubectl get deployment,pod,svc -n dev
+   NAME                    READY   UP-TO-DATE   AVAILABLE   AGE
+   deployment.apps/nginx   1/1     1            1           2m21s
+   
+   NAME                         READY   STATUS    RESTARTS   AGE
+   pod/nginx-778cb5fb7b-gfjhw   1/1     Running   0          2m21s
+   
+   NAME            TYPE       CLUSTER-IP       EXTERNAL-IP   PORT(S)        AGE
+   service/nginx   NodePort   10.107.118.164   <none>        80:32557/TCP   46s
+   ```
+
+3. 部署HPA
+
+   创建pc-hap.yaml
+
+   ```yaml
+   apiVersion: autoscaling/v1
+   kind: HorizontalPodAutoscaler
+   metadata:
+     name: pc-ha
+     namespace: dev
+   spec:
+     maxReplicas: 10 #最大pod数量
+     minReplicas: 1  #最小pod数量
+     targetCPUUtilizationPercentage: 3 #cpu使用指标（百分值，这里指3%）
+     scaleTargetRef: # 指定要控制的信息
+       apiVersion: apps/v1
+       kind: Deployment
+       name: nginx
+   ```
+
+   ```shell
+   #创建hpa
+   [root@master kubernets]# kubectl apply -f pc-hap.yaml 
+   #查看hpa
+   [root@master kubernets]# kubectl get hpa -n dev
+   NAME    REFERENCE          TARGETS   MINPODS   MAXPODS   REPLICAS   AGE
+   pc-ha   Deployment/nginx   0%/3%     1         10        1          48s
+   ```
+
+4. 测试
+
+   使用压力测试工具对service地址172.16.8.100:32557进行压力测试，然后通过控制台查看hpa和pod的变化。
