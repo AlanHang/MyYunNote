@@ -688,7 +688,7 @@ yarn queue -status <queue_name>
   ```shell
   vim hadoop-env.sh
   #指定JAVA_HOME
-  export JAVA_HOME=/opt/soft/jdk1.8.0\_251(可以通过echo $JAVA_HOME查看) 
+  export JAVA_HOME=/opt/soft/jdk1.8.0_251(可以通过echo $JAVA_HOME查看) 
   #指定hadoop用户，hadoop3.x之后必须配置(我的用户名就叫hadoop)
   export HDFS_NAMENODE_USER=hadoop
   export HDFS_DATANODE_USER=hadoop 
@@ -696,6 +696,7 @@ yarn queue -status <queue_name>
   export HDFS_JOURNALNODE_USER=hadoop
   export YARN_RESOURCEMANAGER_USER=hadoop 
   export YARN_NODEMANAGER_USER=hadoop
+  export HADOOP_PID_DIR=/mnt/disk1/hadoop-3.1.3/pid
   ```
 
 - 配置core-site.xml文件
@@ -854,14 +855,28 @@ yarn queue -status <queue_name>
   </property>
   <property>
       <name>yarn.nodemanager.env-whitelist</name>
-       <value>JAVA_HOME,HADOOP_COMMON_HOME,HADOOP_HDFS_HOME,HADOOP_CONF_DIR,CLASSPATH_PREPEND_DISTCACHE,HADOOP_YARN_HOME,HADOOP_MAPRED_HOME</value>
+       <value>JAVA_HOME,HADOOP_COMMON_HOME,HADOOP_HDFS_HOME,HADOOP_CONF_DIR,CLASSPATH_PREPEND_DISTCACHE,HADOOP_YARN_HOME,HADOOP_MAPRED_HOME,PATH</value>
   </property>
-  <!--配置yarn的最大container内存大小-->
+  <property>
+      <name>yarn.application.classpath</name>
+      <value>
+          /mnt/disk1/hadoop-3.1.3/hadoop-3.1.3/etc/hadoop,
+          /mnt/disk1/hadoop-3.1.3/hadoop-3.1.3/etc/hadoop/common/*,
+          /mnt/disk1/hadoop-3.1.3/hadoop-3.1.3/etc/hadoop/common/lib/*,
+          /mnt/disk1/hadoop-3.1.3/hadoop-3.1.3/etc/hadoop/hdfs/*,
+          /mnt/disk1/hadoop-3.1.3/hadoop-3.1.3/etc/hadoop/hdfs/lib/*,
+          /mnt/disk1/hadoop-3.1.3/hadoop-3.1.3/etc/hadoop/mapreduce/*,
+          /mnt/disk1/hadoop-3.1.3/hadoop-3.1.3/etc/hadoop/mapreduce/lib/*,
+          /mnt/disk1/hadoop-3.1.3/hadoop-3.1.3/etc/hadoop/yarn/*,
+          /mnt/disk1/hadoop-3.1.3/hadoop-3.1.3/etc/hadoop/yarn/lib/*
+      </value>
+  </property>
+  <!--配置yarn的最大container内存大小,单位M-->
   <property>
       <name>yarn.scheduler.maximum-allocation-mb</name>
       <value>10240</value>
   </property>
-  <!--配置yarn的每个节点内存大小-->
+  <!--配置yarn的每个节点内存大小,单位M-->
   <property>
       <name>yarn.nodemanager.resource.memory-mb</name>
       <value>184320</value>
@@ -876,27 +891,43 @@ yarn queue -status <queue_name>
 - 配置mapred-site.xml文件
 
   ```xml
-      <property>
-          <name>mapreduce.framework.name</name>
-          <value>yarn</value>
-      </property>
-      <property>
-          <name>mapreduce.application.classpath</name>
-          <value>
-              /mnt/disk1/hadoop-3.1.3/hadoop-3.1.3/etc/hadoop,
-              /mnt/disk1/hadoop-3.1.3/hadoop-3.1.3/etc/hadoop/common/*,
-              /mnt/disk1/hadoop-3.1.3/hadoop-3.1.3/etc/hadoop/common/lib/*,
-              /mnt/disk1/hadoop-3.1.3/hadoop-3.1.3/etc/hadoop/hdfs/*,
-              /mnt/disk1/hadoop-3.1.3/hadoop-3.1.3/etc/hadoop/hdfs/lib/*,
-              /mnt/disk1/hadoop-3.1.3/hadoop-3.1.3/etc/hadoop/mapreduce/*,
-              /mnt/disk1/hadoop-3.1.3/hadoop-3.1.3/etc/hadoop/mapreduce/lib/*,
-              /mnt/disk1/hadoop-3.1.3/hadoop-3.1.3/etc/hadoop/yarn/*,
-              /mnt/disk1/hadoop-3.1.3/hadoop-3.1.3/etc/hadoop/yarn/lib/*
-          </value>
+  <property>
+      <name>mapreduce.framework.name</name>
+      <value>yarn</value>
+  </property>
+   <!-- <property>
+     <name>mapreduce.application.classpath</name>
+      <value>
+          /mnt/disk1/hadoop-3.1.3/hadoop-3.1.3/etc/hadoop,
+          /mnt/disk1/hadoop-3.1.3/hadoop-3.1.3/etc/hadoop/common/*,
+          /mnt/disk1/hadoop-3.1.3/hadoop-3.1.3/etc/hadoop/common/lib/*,
+          /mnt/disk1/hadoop-3.1.3/hadoop-3.1.3/etc/hadoop/hdfs/*,
+          /mnt/disk1/hadoop-3.1.3/hadoop-3.1.3/etc/hadoop/hdfs/lib/*,
+          /mnt/disk1/hadoop-3.1.3/hadoop-3.1.3/etc/hadoop/mapreduce/*,
+          /mnt/disk1/hadoop-3.1.3/hadoop-3.1.3/etc/hadoop/mapreduce/lib/*,
+          /mnt/disk1/hadoop-3.1.3/hadoop-3.1.3/etc/hadoop/yarn/*,
+          /mnt/disk1/hadoop-3.1.3/hadoop-3.1.3/etc/hadoop/yarn/lib/*
+      </value> 
+  </property> -->
+  <property>
+      <name>mapreduce.jobhistory.address</name>
+    <value>xcloud55:10020</value>
+  </property>
+  <property>
+      <name>mapreduce.jobhistory.webapp.address</name>
+      <value>xcloud55:19888</value>
   </property>
   
+  <property>
+      <name>mapreduce.admin.user.env</name>
+      <value>HADOOP_MAPRED_HOME=$HADOOP_HOME</value>
+  </property>
+  <property>
+      <name>yarn.app.mapreduce.am.env</name>
+      <value>HADOOP_MAPRED_HOME=$HADOOP_HOME</value>
+  </property>
   ```
-
+  
   
 
 ## 5.启动
@@ -930,7 +961,7 @@ yarn queue -status <queue_name>
 yarn --daemon start resourcemanager
   
   #启动JobHistoryServer的方法
-  mr-jobhistory-daemon.sh start historyserver(mapred --daemon start)
+  mr-jobhistory-daemon.sh start historyserver(mapred --daemon start historyserver)
   ```
   
   

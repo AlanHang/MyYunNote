@@ -1374,3 +1374,768 @@ kubectl delete -f pc-deployment.yaml
 4. 测试
 
    使用压力测试工具对service地址172.16.8.100:32557进行压力测试，然后通过控制台查看hpa和pod的变化。
+
+## 6.5 DaemonSet(DS)
+
+![image-20220407192104982](kubernetes.assets/image-20220407192104982.png)
+
+资源清单：
+
+![image-20220407192152980](kubernetes.assets/image-20220407192152980.png)
+
+创建pc-daemonset.yaml，内容：
+
+```yaml
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: pc-deamonset
+  namespace: dev
+spec:
+  selector:
+    matchLabels:
+      app: nginx-pod
+  template:
+    metadata:
+      labels:
+        app: nginx-pod
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:1.17.1
+```
+
+## 6.6 Job
+
+![image-20220407192702265](kubernetes.assets/image-20220407192702265.png)
+
+资源清单：
+
+![image-20220407192747798](kubernetes.assets/image-20220407192747798.png)
+
+![image-20220407193106996](kubernetes.assets/image-20220407193106996.png)
+
+创建pc-job.yaml，内容如下：
+
+```yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pc-job
+  namespace: dev
+spec:
+  manualSelector: true
+  selector:
+    matchLabels:
+      app: counter-pod
+  template:
+    metadata:
+      labels:
+        app: counter-pod
+    spec:
+      containers:
+        - name: counter
+          image: busybox:1.30
+          command:
+            - "bin/bash"
+            - "-c"
+            - "for i in 9 8 7 6 5 4 3 2 1;do done echo $i;sleep 3;done"
+```
+
+## 6.7 CronJob(CJ)
+
+![image-20220407193747008](kubernetes.assets/image-20220407193747008.png)
+
+cronJob资源清单：
+
+![image-20220407194413025](kubernetes.assets/image-20220407194413025.png)
+
+![image-20220407194025544](kubernetes.assets/image-20220407194025544.png)
+
+```yaml
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: pc-cronjob
+  namespace: dev
+  labels:
+    controller: cronjob
+spec:
+  schedule: "*/1 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: counter
+              image: busybox:1.30
+              command:
+                - "bin/bash"
+                - "-c"
+                - "for i in 9 8 7 6 5 4 3 2 1;do done echo $i;sleep 3;done"
+```
+
+## 6.8 StatefulSet(sts)
+
+- 无状态应用：
+
+- - 认为Pod都是一样的。
+  - 没有顺序要求。
+  - 不用考虑在哪个Node节点上运行。
+  - 随意进行伸缩和扩展。
+
+- 有状态应用：
+
+- - 有顺序的要求。
+  - 认为每个Pod都是不一样的。
+  - 需要考虑在哪个Node节点上运行。
+  - 需要按照顺序进行伸缩和扩展。
+  - 让每个Pod都是独立的，保持Pod启动顺序和唯一性。
+
+- StatefulSet是Kubernetes提供的管理有状态应用的负载管理控制器。
+- StatefulSet部署需要HeadLinessService（无头服务）。
+
+为什么需要HeadLinessService（无头服务）？
+
+- 在用Deployment时，每一个Pod名称是没有顺序的，是随机字符串，因此是Pod名称是无序的，但是在StatefulSet中要求必须是有序 ，每一个Pod不能被随意取代，Pod重建后pod名称还是一样的。
+- 而Pod IP是变化的，所以是以Pod名称来识别。Pod名称是Pod唯一性的标识符，必须持久稳定有效。这时候要用到无头服务，它可以给每个Pod一个唯一的名称 。
+
+-  StatefulSet常用来部署RabbitMQ集群、Zookeeper集群、MySQL集群、Eureka集群等。
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-headliness
+  namespace: dev
+spec:
+  selector:
+    app: nginx-pod
+  clusterIP: None # 将clusterIP设置为None，即可创建headliness Service
+  type: ClusterIP
+  ports:
+    - port: 80 # Service的端口
+      targetPort: 80 # Pod的端口
+---
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: pc-statefulset
+  namespace: dev
+spec:
+  replicas: 3
+  serviceName: service-headliness
+  selector:
+    matchLabels:
+      app: nginx-pod
+  template:
+    metadata:
+      labels:
+        app: nginx-pod
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:1.17.1
+          ports:
+            - containerPort: 80
+```
+
+> deployment 和statefulset的区别
+
+- Deployment和StatefulSet的区别：Deployment没有唯一标识而StatefulSet有唯一标识。
+- StatefulSet的唯一标识是根据主机名+一定规则生成的。
+- StatefulSet的唯一标识是`主机名.无头Service名称.命名空间.svc.cluster.local`。
+
+# 7.Service详解
+
+本章节主要介绍kubernetes流量负载的组件：Service（4层）和Ingress（7层）
+
+## 7.1 Service介绍
+
+![image-20220411192034073](kubernetes.assets/image-20220411192034073.png)
+
+![image-20220411192146131](kubernetes.assets/image-20220411192146131.png)
+
+![image-20220411192536628](kubernetes.assets/image-20220411192536628.png)
+
+![image-20220411192715083](kubernetes.assets/image-20220411192715083.png)
+
+![image-20220411192910050](kubernetes.assets/image-20220411192910050.png)
+
+![image-20220411193123246](kubernetes.assets/image-20220411193123246.png)
+
+```shell
+#搜索mode,将内容改为ipvs
+[root@master ~]# kubectl edit cm kube-proxy -n kube-system
+[root@master ~]# kubectl delete pod -l k8s-app=kube-proxy -n kube-system
+```
+
+## 7.2 Service详解
+
+![image-20220411193647760](kubernetes.assets/image-20220411193647760.png)
+
+## 7.3 Service使用
+
+### 7.3.1 环境准备
+
+准备deployment.yaml
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pc-deployment
+  namespace: dev
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx-pod
+  template:
+    metadata:
+      labels:
+        app: nginx-pod
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:1.17.1
+          ports:
+            - containerPort: 80
+```
+
+```shell
+[root@master kubernets]# kubectl create -f deployment.yaml 
+#查看pod详情
+[root@master kubernets]# kubectl get pods -n dev -o wide --show-labels
+NAME                             READY   STATUS    RESTARTS   AGE     IP            NODE    NOMINATED NODE   READINESS GATES   LABELS
+nginx-778cb5fb7b-gfjhw           1/1     Running   2          4d23h   10.244.1.18   node1   <none>           <none>            pod-template-hash=778cb5fb7b,run=nginx
+pc-deployment-6696798b78-2wnpw   1/1     Running   0          23s     10.244.2.8    node2   <none>           <none>            app=nginx-pod,pod-template-hash=6696798b78
+pc-deployment-6696798b78-94vjm   1/1     Running   0          23s     10.244.2.9    node2   <none>           <none>            app=nginx-pod,pod-template-hash=6696798b78
+pc-deployment-6696798b78-wcczb   1/1     Running   0          23s     10.244.1.20   node1   <none>           <none>            app=nginx-pod,pod-template-hash=6696798b78
+
+#为了方便测试，修改三台Nginx的index.html页面
+[root@master kubernets]# kubectl exec -it pc-deployment-6696798b78-2wnpw -n dev /bin/bash
+echo "10.244.2.8" > /usr/share/nginx/html/index.html
+```
+
+### 7.3.2 ClusterIP类型的Service
+
+创建service-clusterip.yaml文件
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-clusterip
+  namespace: dev
+spec:
+  selector:
+    app: nginx-pod
+  clusterIP: 10.97.97.97
+  type: ClusterIP
+  ports:
+    - port: 81 #Service端口，可以自定义
+      targetPort: 80 #pod端口，对应pod开放的端口
+```
+
+```shell
+#创建service
+[root@master kubernets]# vim service-clusterip.yaml
+
+#查看service
+[root@master kubernets]# kubectl get svc -n dev -o wide
+NAME                TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)        AGE   SELECTOR
+nginx               NodePort    10.107.118.164   <none>        80:32557/TCP   5d    run=nginx
+service-clusterip   ClusterIP   10.97.97.97      <none>        81/TCP         59s   app=nginx-pod
+
+#查看service的详细信息
+#在这里有一个Endpoint列表，里面就是当前service可以负载的服务端口
+[root@master kubernets]# kubectl describe svc service-clusterip -n dev
+Name:              service-clusterip
+Namespace:         dev
+Labels:            <none>
+Annotations:       <none>
+Selector:          app=nginx-pod
+Type:              ClusterIP
+IP:                10.97.97.97
+Port:              <unset>  81/TCP
+TargetPort:        80/TCP
+Endpoints:         10.244.1.20:80,10.244.2.8:80,10.244.2.9:80
+Session Affinity:  None
+Events:            <none>
+
+#查看ipvs的映射规则
+[root@master kubernets]# ipvsadm -Ln
+TCP  10.97.97.97:81 rr
+  -> 10.244.1.20:80               Masq    1      0          0         
+  -> 10.244.2.8:80                Masq    1      0          0         
+  -> 10.244.2.9:80                Masq    1      0          0 
+  
+#访问10.97.97.97:81观察效果
+[root@master kubernets]# curl 10.97.97.97:81
+10.244.2.9
+
+#循环访问测试
+[root@master kubernets]# while true;do curl 10.97.97.97:81;sleep 5;done;
+10.244.2.8
+10.244.1.20
+10.244.2.9
+10.244.2.8
+10.244.1.20
+10.244.2.9
+
+#修改分发策略--sessionAffinity：ClusterIP
+#查看IPVS规则，persistent表示持久
+[root@master kubernets]# ipvsadm -Ln
+TCP  10.97.97.97:81 rr  persistent 10800
+  -> 10.244.1.20:80               Masq    1      0          0         
+  -> 10.244.2.8:80                Masq    1      0          0         
+  -> 10.244.2.9:80                Masq    1      0          0 
+  
+#循环访问测试
+[root@master kubernets]# while true;do curl 10.97.97.97:81;sleep 5;done;
+10.244.2.8
+10.244.2.8
+10.244.2.8
+
+#删除service
+[root@master kubernets]# kubectl delete -f service-clusterip.yaml
+```
+
+![image-20220411195858947](kubernetes.assets/image-20220411195858947.png)
+
+![image-20220412191114035](kubernetes.assets/image-20220412191114035.png)
+
+### 7.3.3 HeadLiness类型的Service
+
+![image-20220412191409101](kubernetes.assets/image-20220412191409101.png)
+
+创建service-headliness.yaml
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-headliness
+  namespace: dev
+spec:
+  selector:
+    app: nginx-pod
+  clusterIP: None
+  type: ClusterIP
+  ports:
+    - port: 81 #Service端口
+      targetPort: 80 #pod端口
+```
+
+```shell
+[root@master kubernets]# vim service-headliness.yaml
+
+#获取service，发现CLUSTER-IP未分配
+[root@master kubernets]# kubectl get svc -n dev
+NAME                TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+service-clusterip   ClusterIP   None         <none>        81/TCP    7s
+
+#查看域名解析情况
+[root@master kubernets]# kubectl exec -it pc-deployment-6696798b78-2wnpw -n dev /bin/bash
+root@pc-deployment-6696798b78-2wnpw:/# cat /etc/resolv.conf 
+nameserver 10.96.0.10
+search dev.svc.cluster.local svc.cluster.local cluster.local
+options ndots:5
+
+#规则服务名.命名空间.查出的第二个信息svc.cluster.local
+root@master kubernets]# dig @10.96.0.10 service-headliness.dev.svc.cluster.local
+;; ANSWER SECTION:
+service-headliness.dev.svc.cluster.local. 30 IN	A 10.244.2.9
+service-headliness.dev.svc.cluster.local. 30 IN	A 10.244.1.20
+service-headliness.dev.svc.cluster.local. 30 IN	A 10.244.2.8
+```
+
+### 7.3.4 NodePort类型的Service
+
+![image-20220412192521224](kubernetes.assets/image-20220412192521224.png)
+
+创建service-nodeport.yaml
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-nodeport
+  namespace: dev
+spec:
+  selector:
+    app: nginx-pod
+  type: NodePort #service类型
+  ports:
+    - port: 81 #Service端口
+      targetPort: 80 #pod端口
+      nodePort: 30002 #指定绑定的端口(默认的取值范围是30000-32767),如果不指定，会默认分配
+```
+
+```shell
+#创建service
+[root@master kubernets]# kubectl create -f service-nodeport.yaml 
+
+#查看service
+[root@master kubernets]# kubectl get svc -n dev
+NAME                 TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE
+service-nodeport     NodePort    10.97.172.188   <none>        81:30002/TCP   4s
+```
+
+### 7.3.5 LoadBalancer类型的Service
+
+![image-20220412193136248](kubernetes.assets/image-20220412193136248.png)
+
+### 7.3.6 ExternalName类型的Service
+
+![image-20220412193225786](kubernetes.assets/image-20220412193225786.png)
+
+![image-20220412193505482](kubernetes.assets/image-20220412193505482.png)
+
+## 7.4 Ingress介绍
+
+![image-20220412193705240](kubernetes.assets/image-20220412193705240.png)
+
+![image-20220412194004810](kubernetes.assets/image-20220412194004810.png)
+
+![image-20220412194048640](kubernetes.assets/image-20220412194048640.png)
+
+## 7.5 Ingress介绍
+
+### 环境准备
+
+```shell
+wget https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-0.30.0/deploy/static/provider/baremetal/service-nodeport.yaml
+```
+
+
+
+mandatory.yaml
+
+```yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ingress-nginx
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+
+---
+
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: nginx-configuration
+  namespace: ingress-nginx
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: tcp-services
+  namespace: ingress-nginx
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: udp-services
+  namespace: ingress-nginx
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: nginx-ingress-serviceaccount
+  namespace: ingress-nginx
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  name: nginx-ingress-clusterrole
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+      - endpoints
+      - nodes
+      - pods
+      - secrets
+    verbs:
+      - list
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - nodes
+    verbs:
+      - get
+  - apiGroups:
+      - ""
+    resources:
+      - services
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - events
+    verbs:
+      - create
+      - patch
+  - apiGroups:
+      - "extensions"
+      - "networking.k8s.io"
+    resources:
+      - ingresses
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - "extensions"
+      - "networking.k8s.io"
+    resources:
+      - ingresses/status
+    verbs:
+      - update
+
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: Role
+metadata:
+  name: nginx-ingress-role
+  namespace: ingress-nginx
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+      - pods
+      - secrets
+      - namespaces
+    verbs:
+      - get
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+    resourceNames:
+      # Defaults to "<election-id>-<ingress-class>"
+      # Here: "<ingress-controller-leader>-<nginx>"
+      # This has to be adapted if you change either parameter
+      # when launching the nginx-ingress-controller.
+      - "ingress-controller-leader-nginx"
+    verbs:
+      - get
+      - update
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+    verbs:
+      - create
+  - apiGroups:
+      - ""
+    resources:
+      - endpoints
+    verbs:
+      - get
+
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: RoleBinding
+metadata:
+  name: nginx-ingress-role-nisa-binding
+  namespace: ingress-nginx
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: nginx-ingress-role
+subjects:
+  - kind: ServiceAccount
+    name: nginx-ingress-serviceaccount
+    namespace: ingress-nginx
+
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: nginx-ingress-clusterrole-nisa-binding
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: nginx-ingress-clusterrole
+subjects:
+  - kind: ServiceAccount
+    name: nginx-ingress-serviceaccount
+    namespace: ingress-nginx
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-ingress-controller
+  namespace: ingress-nginx
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ingress-nginx
+      app.kubernetes.io/part-of: ingress-nginx
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: ingress-nginx
+        app.kubernetes.io/part-of: ingress-nginx
+      annotations:
+        prometheus.io/port: "10254"
+        prometheus.io/scrape: "true"
+    spec:
+      # wait up to five minutes for the drain of connections
+      terminationGracePeriodSeconds: 300
+      serviceAccountName: nginx-ingress-serviceaccount
+      nodeSelector:
+        kubernetes.io/os: linux
+      containers:
+        - name: nginx-ingress-controller
+          image: quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.30.0
+          args:
+            - /nginx-ingress-controller
+            - --configmap=$(POD_NAMESPACE)/nginx-configuration
+            - --tcp-services-configmap=$(POD_NAMESPACE)/tcp-services
+            - --udp-services-configmap=$(POD_NAMESPACE)/udp-services
+            - --publish-service=$(POD_NAMESPACE)/ingress-nginx
+            - --annotations-prefix=nginx.ingress.kubernetes.io
+          securityContext:
+            allowPrivilegeEscalation: true
+            capabilities:
+              drop:
+                - ALL
+              add:
+                - NET_BIND_SERVICE
+            # www-data -> 101
+            runAsUser: 101
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+            - name: https
+              containerPort: 443
+              protocol: TCP
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /healthz
+              port: 10254
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 10
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /healthz
+              port: 10254
+              scheme: HTTP
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 10
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  - /wait-shutdown
+
+---
+
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: ingress-nginx
+  namespace: ingress-nginx
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+spec:
+  limits:
+  - min:
+      memory: 90Mi
+      cpu: 100m
+    type: Container
+```
+
+service-nodeport.yaml
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: ingress-nginx
+  namespace: ingress-nginx
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+spec:
+  type: NodePort
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+      protocol: TCP
+    - name: https
+      port: 443
+      targetPort: 443
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+
+---
+```
