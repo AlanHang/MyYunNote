@@ -861,14 +861,14 @@ yarn queue -status <queue_name>
       <name>yarn.application.classpath</name>
       <value>
           /mnt/disk1/hadoop-3.1.3/hadoop-3.1.3/etc/hadoop,
-          /mnt/disk1/hadoop-3.1.3/hadoop-3.1.3/etc/hadoop/common/*,
-          /mnt/disk1/hadoop-3.1.3/hadoop-3.1.3/etc/hadoop/common/lib/*,
-          /mnt/disk1/hadoop-3.1.3/hadoop-3.1.3/etc/hadoop/hdfs/*,
-          /mnt/disk1/hadoop-3.1.3/hadoop-3.1.3/etc/hadoop/hdfs/lib/*,
-          /mnt/disk1/hadoop-3.1.3/hadoop-3.1.3/etc/hadoop/mapreduce/*,
-          /mnt/disk1/hadoop-3.1.3/hadoop-3.1.3/etc/hadoop/mapreduce/lib/*,
-          /mnt/disk1/hadoop-3.1.3/hadoop-3.1.3/etc/hadoop/yarn/*,
-          /mnt/disk1/hadoop-3.1.3/hadoop-3.1.3/etc/hadoop/yarn/lib/*
+          /mnt/disk1/hadoop-3.1.3/hadoop-3.1.3/share/hadoop/common/*,
+          /mnt/disk1/hadoop-3.1.3/hadoop-3.1.3/share/hadoop/common/lib/*,
+          /mnt/disk1/hadoop-3.1.3/hadoop-3.1.3/share/hadoop/hdfs/*,
+          /mnt/disk1/hadoop-3.1.3/hadoop-3.1.3/share/hadoop/hdfs/lib/*,
+          /mnt/disk1/hadoop-3.1.3/hadoop-3.1.3/share/hadoop/mapreduce/*,
+          /mnt/disk1/hadoop-3.1.3/hadoop-3.1.3/share/hadoop/mapreduce/lib/*,
+          /mnt/disk1/hadoop-3.1.3/hadoop-3.1.3/share/hadoop/yarn/*,
+          /mnt/disk1/hadoop-3.1.3/hadoop-3.1.3/share/hadoop/yarn/lib/*
       </value>
   </property>
   <!--配置yarn的最大container内存大小,单位M-->

@@ -1808,10 +1808,30 @@ service-nodeport     NodePort    10.97.172.188   <none>        81:30002/TCP   4s
 ### 环境准备
 
 ```shell
-wget https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-0.30.0/deploy/static/provider/baremetal/service-nodeport.yaml
+#新建文件夹
+[root@master kubernets]# mkdir ingress-controller && cd ingress-controller
+#获取ingress-nginx，本次使用的是0.30版本
+[root@master ingress-controller]# wget https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-0.30.0/deploy/static/provider/baremetal/service-nodeport.yaml
+[root@master ingress-controller]# wget https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-0.30.0/deploy/static/mandatory.yaml
+
+#修改mandatory.yaml中的nginx-ingress-serviceaccount镜像为国内镜像，有外网可以不用替换，国内镜像不好用时换一个
+#修改quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.30.0
+#为quay-mirro.qiniu.com/kubernetes-ingress-controller/nginx-ingress-controller:0.30.0
+
+#创建ingress-nginx
+[root@master ingress-controller]# kubectl apply -f ./
+
+#查看pod
+[root@master ingress-controller]# kubectl get pod -n ingress-nginx
+NAME                                        READY   STATUS    RESTARTS   AGE
+nginx-ingress-controller-7f74f657bd-wt7rh   1/1     Running   0          15h
+
+#查看service
+[root@master kubernets]# kubectl get svc -n ingress-nginx
+NAME            TYPE       CLUSTER-IP      EXTERNAL-IP   PORT(S)                      AGE
+ingress-nginx   NodePort   10.96.114.120   <none>        80:32723/TCP,443:32468/TCP   2m33s
+
 ```
-
-
 
 mandatory.yaml
 
@@ -2139,3 +2159,107 @@ spec:
 
 ---
 ```
+
+![image-20220422173907286](kubernetes.assets/image-20220422173907286.png)
+
+创建tomcat-nginx.xml
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  namespace: dev
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx-pod
+  template:
+    metadata:
+      labels:
+        app: nginx-pod
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:1.17.1
+          ports:
+            - containerPort: 80
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tomcat-deployment
+  namespace: dev
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: tomcat-pod
+  template:
+    metadata:
+      labels:
+        app: tomcat-pod
+    spec:
+      containers:
+        - name: tomcat
+          image: tomcat:8.5-jre10-slim
+          ports:
+            - containerPort: 8080
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+  namespace: dev
+spec:
+  selector:
+    app: nginx-pod
+  clusterIP: None
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 80
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: tomcat-service
+  namespace: dev
+spec:
+  selector:
+    app: tomcat-pod
+  clusterIP: None
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: 8080
+```
+
+```shell
+[root@master kubernets]# kubectl create -f tomcat-nginx.yaml 
+deployment.apps/nginx-deployment created
+deployment.apps/tomcat-deployment created
+service/nginx-service created
+service/tomcat-service created
+[root@master kubernets]# kubectl get svc -n dev
+NAME             TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)    AGE
+nginx-service    ClusterIP   None         <none>        80/TCP     9s
+tomcat-service   ClusterIP   None         <none>        8080/TCP   8s
+
+[root@master kubernets]# kubectl get pods -n dev
+NAME                                 READY   STATUS    RESTARTS   AGE
+nginx-deployment-6696798b78-7jpvd    1/1     Running   0          18m
+nginx-deployment-6696798b78-rq97t    1/1     Running   0          18m
+nginx-deployment-6696798b78-s7g5c    1/1     Running   0          18m
+tomcat-deployment-58467d5474-8gklp   1/1     Running   0          18m
+tomcat-deployment-58467d5474-8qsr2   1/1     Running   0          18m
+tomcat-deployment-58467d5474-c5c84   1/1     Running   0          18m
+```
+
