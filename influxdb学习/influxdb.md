@@ -166,3 +166,32 @@
 
 
 
+influxdb的存储引擎具有wal和一组只读数据文件，它们在概念上与LSM树中的SSTables类似；TSM文件包含排序，压缩的series数据。
+
+存储引擎将多个组件结合在一起，并提供用于存储和查询series数据的外部接口。 它由许多组件组成，每个组件都起着特定的作用：
+
+- In-Memory Index —— 内存中的索引是分片上的共享索引，可以快速访问measurement，tag和series。 引擎使用该索引，但不是特指存储引擎本身。
+  WAL —— WAL是一种写优化的存储格式，允许写入持久化，但不容易查询。 对WAL的写入就是append到固定大小的段中。
+- Cache —— Cache是存储在WAL中的数据的内存中的表示。 它在运行时可以被查询，并与TSM文件中存储的数据进行合并。
+- TSM Files —— TSM Files中保存着柱状格式的压缩过的series数据。
+- FileStore —— FileStore可以访问磁盘上的所有TSM文件。 它可以确保在现有的TSM文件被替换时以及删除不再使用的TSM文件时，创建TSM文件是原子性的。
+- Compactor —— Compactor负责将不够优化的Cache和TSM数据转换为读取更为优化的格式。 它通过压缩series，去除已经删除的数据，优化索引并将较小的文件组合成较大的文件来实现。
+- Compaction Planner —— Compaction Planner决定哪个TSM文件已准备好进行压缩，并确保多个并发压缩不会彼此干扰。
+- Compression —— Compression由各种编码器和解码器对特定数据类型作处理。一些编码器是静态的，总是以相同的方式编码相同的类型; 还有一些可以根据数据的类型切换其压缩策略。
+- Writers/Readers —— 每个文件类型（WAL段，TSM文件，tombstones等）都有相应格式的Writers和Readers。
+
+InfluxDB的0.9版本使用BoltDB作为底层存储引擎。下面要介绍的TSM，它在0.9.5中发布，是InfluxDB 0.11+中唯一支持的存储引擎，包括整个1.x系列。
+
+BoltDB，这是一个基于内存映射B+ Tree的引擎，它是针对读取进行了优化的。最后，我们最终建立了我们自己的存储引擎，它在许多方面与LSM树类似。借助我们的新存储引擎，我们可以达到比B+ Tree实现高达45倍的磁盘空间使用量的减少，甚至比使用LevelDB及其变体有更高的写入吞吐量和压缩率。
+
+
+
+# InfluxDB文件结构解析
+
+参考文献 https://blog.csdn.net/u012794915/article/details/100061367
+
+
+
+# influxDB 简单使用
+
+参考文件 https://jasper-zhang1.gitbooks.io/influxdb/content/Introduction/getting_start.html
