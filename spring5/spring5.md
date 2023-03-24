@@ -546,12 +546,12 @@
    ![image-20210917094817817](spring5.assets/image-20210917094817817.png)
    
 5. 基于注解实现属性注入
-  
+
   - @AutoWired: 根据属性类型自动装配
   - @Qualifier: 根据属性名称进行注入。需要和@AutoWired一起使用。
   - @Resource: 可以根据类型注入，可以根据名称注入，javax.annotation.Resource，不是Spring中的注解。
   - @Value: 注入基本类型属性
-  
+
 6. 完全注解开发
 
    - (1) 创建配置类，为了替代配置文件。
@@ -733,5 +733,66 @@
      - 基于注解方式(常用)
      - 基于xml配置文件方式
    - 3.3 在Spring进行声明式事务管理，底层使用AOP原理
-   - 
+
+   - 3.4 提供一个接口，代表事务管理器，这个接口针对不同的框架提供不同的实现类。
+
+     ![image-20211007145854684](spring5.assets/image-20211007145854684.png)
+
+4. 声明式事务管理
+
+   - 配置文件中配置事务管理器
+
+     ```xml
+     <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" destory-method="close">
+         <property name="url" value="jdbc:mysql://loalhost:3306/test"/>
+         <property name="username" value="root"/>
+         <property name="password" value="root"/>
+         <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+     </bean>
+     <bean id = "transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+         <!--注入数据源-->
+         <property name="dataSource" ref="dataSource"></property>
+     </bean>
+     ```
+
+   - 在spring配置文件，开启事务注解
+
+     ```xml
+     <?xml version="1.0" encoding="UTF-8"?>
+     <beans xmlns="http://www.springframework.org/schema/beans"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xmlns:context="http://www.springframework.org/schema/context"
+            xmlns:tx="http://www.springframework.org/schema/tx"
+            xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                                http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+                                http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+         
+         <tx:annotation-driven transaction-manager="transactionManager"></tx:annotation-driven>
+         
+     </beans>
+     ```
+
+   - 在service类（或者方法）添加事务注解（@Transactional 注解）
+
+5. 声明式事务管理参数配置
+
+   @Transactional注解参数配置
+
+   - propagation：事务传播行为
+
+     多事务方法直间进行调用，这个过程中事务如何进行管理。
+
+     ![image-20211007153053164](spring5.assets/image-20211007153053164.png)
+
+   - isolation：事务隔离级别
+
+   - timeout：超时时间
+
+   - readOnly：是否只读
+
+   - rollbackFor：回滚
+
+   - noRollbackFor：不回滚
+
+6. 
 

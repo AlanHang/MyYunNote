@@ -138,7 +138,7 @@ Java虚拟机的启动时通过引导类加载器（bootstrap class loader ）�
    - 将常量池内的符号引用转换为直接引用的过程。
    - 事实上，解析操作往往会伴随着JVM在执行完初始化之后再执行。
    - 符号引用就是一组符号来描述所引用的目标。符号引用的字面量形式明确定义在《java虚拟机规范》的Class文件格式中。直接引用就是直接指向目标的指针、相对偏移量或一个间接定位到目标的句柄。
-   - 解析动作主要针对类或接口、字段、类方法、接口方法、方法类型等。对应常量池中的CONSTANT_Class_info、CONSTANT_Filederf_info、CONSTANT_Methodref_info等。
+   - 解析动作主要针对类或接口、字段、类方法、接口方法、方法类型等。对应常量池中的CONSTANT_Class_info、CONSTANT_Filedref_info、CONSTANT_Methodref_info等。
 
 ## 2.3 初始化（initialization）
 
@@ -207,6 +207,8 @@ Java虚拟机的启动时通过引导类加载器（bootstrap class loader ）�
 - 防止源码泄漏
 
 ![image-20210225195033227](JVM详解.assets/image-20210225195033227.png)
+
+![image-20230322233247585](JVM详解.assets/image-20230322233247585.png)
 
 ## 2.6 双亲委派机制
 
