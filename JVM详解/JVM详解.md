@@ -590,7 +590,7 @@ JVM 中的程序计数寄存器（Program Counter Register）中，Register 的�
 
 ![image-20210310105911363](JVM详解.assets/image-20210310105911363.png)
 
-### 3.4.2 设置对空间大小与OOM
+### 3.4.2 设置堆空间大小与OOM
 
 **虚拟机参数设置官方文档**
 
@@ -670,7 +670,7 @@ Eden区满了会触发YGC，Survivor区满了不会触发YGC。触发YGC时Eden�
 ### 3.4.5 常用的调优工具
 
 - JDK命令行
-  - jinfo、jstate、javap、jamp
+  - jinfo、jstate、javap、jmap
 - Eclipse:Memory Analyzer Tool
 - Jconsole
 - VisualVM
@@ -707,7 +707,7 @@ Eden区满了会触发YGC，Survivor区满了不会触发YGC。触发YGC时Eden�
 
 **什么是TLAB**
 
-- 从内存模型而不是垃圾收集的角度，堆Eden区域继续进行划分，JVM为==每个线程分配了一个私有缓存区域==，它包含在Eden空间内。
+- 从内存模型而不是垃圾收集的角度，对Eden区域继续进行划分，JVM为==每个线程分配了一个私有缓存区域==，它包含在Eden空间内。
 - 多线程同时分配内存时，使用TLAB可以避免一系列的非线程安全问题，同时还能够提升内存分配的吞吐量，因此我们可以将这种内存分配方式称为==快速分配策略==。
 - 所有的OpenJDK衍生出来的JVM都提供了TLAB的设计。
 
@@ -823,7 +823,7 @@ Eden区满了会触发YGC，Survivor区满了不会触发YGC。触发YGC时Eden�
 1. 这个类型的完整有效名称（全名=包名.类名）
 2. 这个类型直接父类的完整有效名（对于interface或者是java.lang.Object，都没有父类）
 3. 这个类型的修饰符（public，abstract，final的某个子集）
-4. 这个类型直接接口的一个有序列表
+4. 这个类型实现接口的一个有序列表
 
 **域（Field）信息**
 
@@ -1323,8 +1323,9 @@ public static void main(String[] args){
 - 本地方法栈内JNI引用的对象
 - 方法区中类静态属性引用的对象
   - 比如：Java类的引用类型静态变量
-- 方法区中常用引用的对象
+- 方法区中常量引用的对象
   - 比如字符串常量池（String Table）里的引用
+  - 类属性+final关键字
 - 所有被同步锁synchronized持有的对象
 - Java虚拟机内部的引用。
   - 基本数据类型对应的Class对象，一些常驻的异常对象（如：NullPointerException、OutOfMemoryError) ，系统类加载器。
@@ -1717,8 +1718,6 @@ public static void main(String[] args){
 - -XX：+PrintGCDateStamps 输出GC的时间戳（以日期的形式，如2013-05-04T21:53:59.234+0800）
 - -XX：+PrintHeapAtGC 在进行GC的前后打印出堆的信息
 - -Xloggc：../logs/gc.log 日志文件的输出路径
-
-![image-20210428172542450](JVM详解.assets/image-20210428172542450.png)
 
 ![image-20210428172645510](JVM详解.assets/image-20210428172645510.png)
 
