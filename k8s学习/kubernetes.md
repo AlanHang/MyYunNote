@@ -32,7 +32,7 @@
 
 ### 2.1.1 集群类型
 
-kubernetes集群大体上分为两类：==一主多从和多住多从==。
+kubernetes集群大体上分为两类：==一主多从和多主多从==。
 
 - 一主多次：一台Master节点和多台Node节点，搭建简单，但是有单机故障风险，适合用于测试环境。
 - 多主多从：多台Master节点和多台Node节点，搭建麻烦，安全性高，适合用于生产环境。
@@ -600,12 +600,15 @@ kubectl delete svc svc-nginx-1 -n dev
 
 ### 5.1.2 Pod定义
 
-```yaml
-apiVersion: v1 #必选，版本号
+![image-20230401153200363](kubernetes.assets/image-20230401153200363.png)
 
-```
+![image-20230401153400278](kubernetes.assets/image-20230401153400278.png)
 
-![image-20220323194046281](kubernetes.assets/image-20220323194046281.png)
+![image-20230401153503967](kubernetes.assets/image-20230401153503967.png)
+
+![image-20230401153522224](kubernetes.assets/image-20230401153522224.png)
+
+![image-20230401153722384](kubernetes.assets/image-20230401153722384.png)
 
 ![image-20220323194330341](kubernetes.assets/image-20220323194330341.png)
 
@@ -1803,9 +1806,9 @@ service-nodeport     NodePort    10.97.172.188   <none>        81:30002/TCP   4s
 
 ![image-20220412194048640](kubernetes.assets/image-20220412194048640.png)
 
-## 7.5 Ingress介绍
+## 7.5 Ingress案例
 
-### 环境准备
+### 7.5.1 环境准备
 
 ```shell
 #新建文件夹
@@ -2263,3 +2266,549 @@ tomcat-deployment-58467d5474-8qsr2   1/1     Running   0          18m
 tomcat-deployment-58467d5474-c5c84   1/1     Running   0          18m
 ```
 
+### 7.5.2 http代理
+
+创建ingress-http.yaml
+
+```yaml
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-http
+  namespace: dev
+spec:
+  rules:
+    - host: nginx.zhenghang.com
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: nginx-server
+              servicePort: 80
+    - host: tomcat.zhenghang.com
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: tomcat-service
+              servicePort: 8080
+```
+
+```shell
+kubectl create -f ingress-http.yaml
+
+#查看
+kubectl get ing ingress-http -n dev
+```
+
+![image-20230401104325035](kubernetes.assets/image-20230401104325035.png)
+
+### 7.5.2 https 代理
+
+创建证书
+
+```shell
+# 生成证书
+openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 -keyout tls.crt -subj "/C=CN/ST=BJ/L=BJ/O=nginx/CN=zhenghang.com"
+
+#创建秘钥
+kubect create secret tls tls-secret --key tls.key --cert tls.crt
+```
+
+创建ingress-https.yaml
+
+```yaml
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-https
+  namespace: dev
+spec:
+  tls:
+    - hosts:
+        - nginx.zhenghang.com
+        - tomcat.zhenghang.com
+      secretName: tls-secret #z指定秘钥
+  rules:
+    - host: nginx.zhenghang.com
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: nginx-server
+              servicePort: 80
+    - host: tomcat.zhenghang.com
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: tomcat-service
+              servicePort: 8080
+
+
+```
+
+```shell
+kubetct create -f ingress-https.yaml
+
+kubect get ing ingress-https -n dev
+```
+
+![image-20230401105325409](kubernetes.assets/image-20230401105325409.png)
+
+# 8. 数据存储
+
+![image-20230401105615815](kubernetes.assets/image-20230401105615815.png)
+
+## 8.1 基本存储
+
+### 8.1.1 EmptyDir
+
+![image-20230401105654166](kubernetes.assets/image-20230401105654166.png)
+
+![image-20230401105843669](kubernetes.assets/image-20230401105843669.png)
+
+创建一个volume-emptydir.yaml
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: volume-emptydir
+  namespace: dev
+spec:
+  containers:
+    - name: nginx
+      image: nginx:1.17.1
+      ports:
+        - containerPort: 80
+      volumeMounts: #声明挂载路径
+        - mountPath: /var/log/nginx
+          name: logs-volume
+    - name: busybox
+      image: busybox:1.30
+      command: ["/bin/bash","-c","tail -f /logs/access.log"] #初始命令，动态读取指定文件内容
+      volumeMounts:
+        - mountPath: /logs
+          name: logs-volume
+  volumes: #声明volume
+    - name: logs-volume
+      emptyDir: {}
+```
+
+```shell
+#创建pod
+kubectl create -f volume-emptydir.yaml
+
+#查看pod
+kubectl get pods volume-emptydir -n dev -o wide
+
+#通过podIp访问nginx
+curl 10.244.2.124:80
+
+#查看日志输出
+kubect logs -f volumn-emptydir -n dev -c busybox
+```
+
+![image-20230401110335997](kubernetes.assets/image-20230401110335997.png)
+
+![image-20230401111005774](kubernetes.assets/image-20230401111005774.png)
+
+### 8.1.2 HostPath
+
+![image-20230401113859970](kubernetes.assets/image-20230401113859970.png)
+
+创建volumn-hostpath.yaml
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: volume-emptydir
+  namespace: dev
+spec:
+  containers:
+    - name: nginx
+      image: nginx:1.17.1
+      ports:
+        - containerPort: 80
+      volumeMounts: #声明挂载路径
+        - mountPath: /var/log/nginx
+          name: logs-volume
+    - name: busybox
+      image: busybox:1.30
+      command: ["/bin/bash","-c","tail -f /logs/access.log"] #初始命令，动态读取指定文件内容
+      volumeMounts:
+        - mountPath: /logs
+          name: logs-volume
+  volumes: #声明volume
+    - name: logs-volume
+      hostPath:
+        path: /root/logs
+        type: DirectoryOrCreate # 目录存在就使用，不存在就先创建后使用
+```
+
+![image-20230401114258613](kubernetes.assets/image-20230401114258613.png)
+
+![image-20230401114403333](kubernetes.assets/image-20230401114403333.png)
+
+### 8.1.3 NFS
+
+![image-20230401114504852](kubernetes.assets/image-20230401114504852.png)
+
+```shell
+#在master上安装nfs服务
+yum install nfs-utils -y
+
+#准备一个共享目录
+mkdir /root/data/nfs -pv
+
+#将共享目录以读取权限暴露给192.168.109.0/24网段中
+vim /etc/exports
+more /etc/exports
+/root/data/nfs 192.168.109.0/24(rw,no_root_squash)
+
+#启动nfs服务
+systemctl start nfs
+
+#在node上安装nfs服务，不需要启动
+yum install nfs-utils -y
+```
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: volume-emptydir
+  namespace: dev
+spec:
+  containers:
+    - name: nginx
+      image: nginx:1.17.1
+      ports:
+        - containerPort: 80
+      volumeMounts: #声明挂载路径
+        - mountPath: /var/log/nginx
+          name: logs-volume
+    - name: busybox
+      image: busybox:1.30
+      command: ["/bin/bash","-c","tail -f /logs/access.log"] #初始命令，动态读取指定文件内容
+      volumeMounts:
+        - mountPath: /logs
+          name: logs-volume
+  volumes: #声明volume
+    - name: logs-volume
+      nfs:
+        path: /root/data/nfs
+        server: 192.168.109.100 #服务器地址
+```
+
+![image-20230401115205951](kubernetes.assets/image-20230401115205951.png)
+
+## 8.2 高级存储
+
+### 8.2.1 PV和PVC
+
+![image-20230401115354188](kubernetes.assets/image-20230401115354188.png)
+
+![image-20230401115458110](kubernetes.assets/image-20230401115458110.png)
+
+使用PV和PVC，工作可以进一步得到细分:
+
+- 存储：存储工程师维护
+- PV：kubernetes管理员维护
+- PVC：kubernets用户维护
+
+### 8.2.2 PV
+
+![image-20230401124840516](kubernetes.assets/image-20230401124840516.png)
+
+![image-20230401125001904](kubernetes.assets/image-20230401125001904.png)
+
+![image-20230401125134034](kubernetes.assets/image-20230401125134034.png)
+
+**实验：**
+
+1. 准备NFS环境
+
+```shell
+# 创建目录
+mkdir -pv /root/data/{pv1,pv2,pv3}
+
+# 暴露服务
+vim /etc/exports
+more /etc/exports
+/root/data/pv1 192.168.109.0/24(rw,no_root_squash)
+/root/data/pv2 192.168.109.0/24(rw,no_root_squash)
+/root/data/pv3 192.168.109.0/24(rw,no_root_squash)
+
+#重启服务
+systemctl restart nfs
+```
+
+2. 创建pv.yaml
+
+```yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: p1
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    path: /root/data/pv1
+    server: 192.168.10.100
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: p2
+spec:
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    path: /root/data/pv2
+    server: 192.168.10.100
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: p3
+spec:
+  capacity:
+    storage: 3Gi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    path: /root/data/pv3
+    server: 192.168.10.100
+
+```
+
+3. ![image-20230401125852578](kubernetes.assets/image-20230401125852578.png)
+
+### 8.2.3 PVC
+
+![image-20230401125947350](kubernetes.assets/image-20230401125947350.png)
+
+1. 创建pvc
+
+```yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc1
+  namespace: dev
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+      
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc2
+  namespace: dev
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc3
+  namespace: dev
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
+```
+
+![image-20230401130633682](kubernetes.assets/image-20230401130633682.png)
+
+![image-20230401130712678](kubernetes.assets/image-20230401130712678.png)
+
+2. 创建pods.yaml,使用pvc
+
+```shell
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod1
+  namespace: dev
+spec:
+  containers:
+    - name: nginx
+      image: nginx:1.17.1
+      ports:
+        - containerPort: 80
+      volumeMounts: #声明挂载路径
+        - mountPath: /var/log/nginx
+          name: logs-volume
+    - name: busybox
+      image: busybox:1.30
+      command: ["/bin/bash","-c","tail -f /logs/access.log"] #初始命令，动态读取指定文件内容
+      volumeMounts:
+        - mountPath: /logs
+          name: volume
+  volumes: #声明volume
+    - name: volume
+      persistentVolumeClaim:
+        claimName: pvc1
+        readOnly: false
+
+---
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod2
+  namespace: dev
+spec:
+  containers:
+    - name: nginx
+      image: nginx:1.17.1
+      ports:
+        - containerPort: 80
+      volumeMounts: #声明挂载路径
+        - mountPath: /var/log/nginx
+          name: logs-volume
+    - name: busybox
+      image: busybox:1.30
+      command: ["/bin/bash","-c","tail -f /logs/access.log"] #初始命令，动态读取指定文件内容
+      volumeMounts:
+        - mountPath: /logs
+          name: volume
+  volumes: #声明volume
+    - name: volume
+      persistentVolumeClaim:
+        claimName: pvc2
+        readOnly: false
+```
+
+### 8.2.4 生命周期
+
+![image-20230401131219932](kubernetes.assets/image-20230401131219932.png)
+
+![image-20230401131244652](kubernetes.assets/image-20230401131244652.png)
+
+## 8.3 配置存储
+
+### 8.3.1 ConfigMap
+
+![image-20230401145437531](kubernetes.assets/image-20230401145437531.png)
+
+![image-20230401145626607](kubernetes.assets/image-20230401145626607.png)
+
+![image-20230401145749282](kubernetes.assets/image-20230401145749282.png)
+
+### 8.3.2 Secret
+
+![image-20230401145904608](kubernetes.assets/image-20230401145904608.png)
+
+![image-20230401150140729](kubernetes.assets/image-20230401150140729.png)
+
+![image-20230401150236900](kubernetes.assets/image-20230401150236900.png)
+
+# 9. 安全认证
+
+## 9.1 概述
+
+![image-20230401150336240](kubernetes.assets/image-20230401150336240.png)
+
+![image-20230401150407781](kubernetes.assets/image-20230401150407781.png)
+
+![image-20230401150509767](kubernetes.assets/image-20230401150509767.png)
+
+## 9.2 认证管理
+
+![image-20230401150651230](kubernetes.assets/image-20230401150651230.png)
+
+![image-20230401150725627](kubernetes.assets/image-20230401150725627.png)
+
+![image-20230401150822905](kubernetes.assets/image-20230401150822905.png)
+
+## 9.3 授权管理
+
+![image-20230401150842380](kubernetes.assets/image-20230401150842380.png)
+
+![image-20230401150934676](kubernetes.assets/image-20230401150934676.png)
+
+![image-20230401151006395](kubernetes.assets/image-20230401151006395.png)
+
+![image-20230401151043818](kubernetes.assets/image-20230401151043818.png)
+
+![image-20230401151137321](kubernetes.assets/image-20230401151137321.png)
+
+![image-20230401151206645](kubernetes.assets/image-20230401151206645.png)
+
+![image-20230401151240885](kubernetes.assets/image-20230401151240885.png)
+
+![image-20230401151309577](kubernetes.assets/image-20230401151309577.png)
+
+![image-20230401151348522](kubernetes.assets/image-20230401151348522.png)
+
+![image-20230401151428851](kubernetes.assets/image-20230401151428851.png)
+
+![image-20230401151453928](kubernetes.assets/image-20230401151453928.png)
+
+![image-20230401151539480](kubernetes.assets/image-20230401151539480.png)
+
+## 9.4 准入管理
+
+![image-20230401151624028](kubernetes.assets/image-20230401151624028.png)
+
+![image-20230401151737286](kubernetes.assets/image-20230401151737286.png)
+
+# 10.DashBoard
+
+![image-20230401151827998](kubernetes.assets/image-20230401151827998.png)
+
+```shell
+#下载yaml
+wget https://raw.githubsuercontent.com/kubernetes/v2.0.0/aio/deoloy/recommended.yaml
+
+#修改kubernets-dashboard的Service类型
+```
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    k8s-app: kubernetes-dashboard
+  name: kubernetes-dashboard
+  namespace: kubernetes-dashboard
+spec:
+  type: NodePort #新增
+  ports:
+    - port: 443
+      targetPort: 8443
+      nodePort: 30009 #新增
+  selector:
+    k8s-app: kubernetes-dashboard
+```
+
+![image-20230401152202626](kubernetes.assets/image-20230401152202626.png)
+
+![image-20230401152529557](kubernetes.assets/image-20230401152529557.png)
