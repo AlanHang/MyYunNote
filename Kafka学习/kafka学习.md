@@ -259,9 +259,9 @@ At Least Once 可以保证数据不丢失，但是不能保证数据不重复；
 
 ​        **At Least Once + 幂等性 = Exactly Once**
 
-要启动幂等性，需要将Producer参数中的enable。idompotence设置为true。Kafka的幂等性实现其实就是江南原来下游的去重放在了数据上游。开启幂等性的Producer在初始化的时候会被分配一个PID，发往同一Partition的消息会附带Sequence Number。而Broker端会对<PID,Partition,SeqNumber>做缓存，当具有相同主键的消息提交时，Broker只会持久化一条。
+要启动幂等性，需要将Producer参数中的enable。idompotence设置为true。Kafka的幂等性实现其实就是将原来下游的去重放在了数据上游。开启幂等性的Producer在初始化的时候会被分配一个PID，发往同一Partition的消息会附带Sequence Number。而Broker端会对<PID,Partition,SeqNumber>做缓存，当具有相同主键的消息提交时，Broker只会持久化一条。
 
-但是PID在Producer重启就会发生变化，同时不同的Partition也具有不同主键，**所以幂等性无法保证跨分区，跨回话的Exactly Once。**	
+但是PID在Producer重启就会发生变化，同时不同的Partition也具有不同主键，**所以幂等性无法保证跨分区，跨会话话的Exactly Once。**	
 
 ## 3.4 Kafka消费者
 
