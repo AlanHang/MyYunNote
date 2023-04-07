@@ -125,7 +125,359 @@ bin/kafka-console-consumer.sh 脚本
 
 ![image-20230404173152295](kafka3.x学习.assets/image-20230404173152295.png)
 
+### 3.2 异步发送API
+
+#### 3.2.1 普通异步发送
+
+```java
+package producer;
+
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.serialization.StringSerializer;
+
+import java.util.Properties;
+
+public class CustomProducer {
+
+    public static void main(String[] args) {
+
+        //0.配置
+        Properties properties = new Properties();
+
+        properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "172.16.8.100:9092,172.16.8.101:9092");
+        //设置序列化类型
+        properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+        properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+
+        //1.创建kafka生产者对象
+        KafkaProducer<String, String> producer = new KafkaProducer<String, String>(properties);
+
+        //2. 提交数据
+        for (int i = 0; i < 5; i++) {
+            producer.send(new ProducerRecord<String, String>("first", "hello" + i));
+        }
+
+        //3. 关闭资源
+        producer.close();
+    }
+}
+```
+
+#### 3.2.2 回调函数的异步发送
+
+```java
+package producer;
 
 
+import org.apache.kafka.clients.producer.*;
+import org.apache.kafka.common.serialization.StringSerializer;
 
+import java.util.Properties;
+
+public class CustomProducer {
+
+    public static void main(String[] args) {
+
+        //0.配置
+        Properties properties = new Properties();
+
+        properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "172.16.8.100:9092");
+        //设置序列化类型
+        properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+        properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+
+        //1.创建kafka生产者对象
+        KafkaProducer<String, String> producer = new KafkaProducer<>(properties);
+
+        //2. 提交数据
+        for (int i = 0; i < 5; i++) {
+            producer.send(new ProducerRecord<>("first", "hello" + i), (metadata, exception) -> {
+                if (exception == null) {
+                    System.out.println("topic:" + metadata.topic() + ";partition:" + metadata.partition());
+                }
+            });
+        }
+
+        //3. 关闭资源
+        producer.close();
+    }
+}
+```
+
+### 3.3 同步发送
+
+> 添加get方法阻塞
+
+```java
+package producer;
+
+
+import org.apache.kafka.clients.producer.*;
+import org.apache.kafka.common.serialization.StringSerializer;
+
+import java.util.Properties;
+import java.util.concurrent.ExecutionException;
+
+public class CustomProducer {
+
+    public static void main(String[] args) throws ExecutionException, InterruptedException {
+
+        //0.配置
+        Properties properties = new Properties();
+
+        properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "172.16.8.100:9092");
+        //设置序列化类型
+        properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+        properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+
+        //1.创建kafka生产者对象
+        KafkaProducer<String, String> producer = new KafkaProducer<>(properties);
+
+        //2. 提交数据
+        for (int i = 0; i < 5; i++) {
+            producer.send(new ProducerRecord<>("first", "hello" + i), (metadata, exception) -> {
+                if (exception == null) {
+                    System.out.println("topic:" + metadata.topic() + ";partition:" + metadata.partition());
+                }
+            }).get();
+        }
+
+        //3. 关闭资源
+        producer.close();
+    }
+}
+```
+
+### 3.4 生产者分区
+
+#### 3.4.1 分区好处
+
+![image-20230407153349707](kafka3.x学习.assets/image-20230407153349707.png)
+
+#### 3.4.2 默认分区规则
+
+![image-20230407154134713](kafka3.x学习.assets/image-20230407154134713.png)
+
+```java
+package producer;
+
+
+import org.apache.kafka.clients.producer.*;
+import org.apache.kafka.common.serialization.StringSerializer;
+
+import java.util.Properties;
+import java.util.concurrent.ExecutionException;
+
+public class CustomProducer {
+
+    public static void main(String[] args) throws ExecutionException, InterruptedException {
+
+        //0.配置
+        Properties properties = new Properties();
+
+        properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "172.16.8.100:9092");
+        //设置序列化类型
+        properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+        properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+
+        //1.创建kafka生产者对象
+        KafkaProducer<String, String> producer = new KafkaProducer<>(properties);
+
+        //2. 提交数据，指定分区0
+        for (int i = 0; i < 5; i++) {
+            producer.send(new ProducerRecord<>("first", 0, "", "hello" + i), (metadata, exception) -> {
+                if (exception == null) {
+                    System.out.println("topic:" + metadata.topic() + ";partition:" + metadata.partition());
+                }
+            });
+        }
+
+        //3. 关闭资源
+        producer.close();
+    }
+}
+```
+
+#### 3.4.3 自定义分区器
+
+实现步骤：
+
+1. 定义类实现Partitioner接口
+2. 重写partition方法
+
+```java
+package producer;
+
+import org.apache.kafka.clients.producer.Partitioner;
+import org.apache.kafka.common.Cluster;
+
+import java.util.Map;
+
+public class MyPartitioner implements Partitioner {
+    @Override
+    public int partition(String topic, Object key, byte[] keyBytes, Object value, byte[] valueBytes, Cluster cluster) {
+        // 获取数据
+        String msg = value.toString();
+        int partition;
+        if (msg.contains("hello")) {
+            partition = 0;
+        } else {
+            partition = 1;
+        }
+        return partition;
+    }
+
+    @Override
+    public void close() {
+
+    }
+
+    @Override
+    public void configure(Map<String, ?> configs) {
+
+    }
+}
+---
+package producer;
+
+
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.serialization.StringSerializer;
+
+import java.util.Properties;
+
+public class CustomProducer {
+
+    public static void main(String[] args) {
+
+        //0.配置
+        Properties properties = new Properties();
+
+        properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "172.16.8.100:9092");
+        //设置序列化类型
+        properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+        properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+
+        //关联自定义分区器
+        properties.put(ProducerConfig.PARTITIONER_CLASS_CONFIG, MyPartitioner.class.getName());
+
+        //1.创建kafka生产者对象
+        KafkaProducer<String, String> producer = new KafkaProducer<>(properties);
+
+        //2. 提交数据
+        for (int i = 0; i < 5; i++) {
+            producer.send(new ProducerRecord<>("first", "hello" + i), (metadata, exception) -> {
+                if (exception == null) {
+                    System.out.println("topic:" + metadata.topic() + ";partition:" + metadata.partition());
+                }
+            });
+            producer.send(new ProducerRecord<>("first", "eeee" + i), (metadata, exception) -> {
+                if (exception == null) {
+                    System.out.println("topic:" + metadata.topic() + ";partition:" + metadata.partition());
+                }
+            });
+        }
+
+        //3. 关闭资源
+        producer.close();
+    }
+}
+```
+
+### 3.5 生产者如何提高吞吐量
+
+![image-20230407161627890](kafka3.x学习.assets/image-20230407161627890.png)
+
+```java
+package producer;
+
+
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.serialization.StringSerializer;
+
+import java.util.Properties;
+
+public class CustomProducer {
+
+    public static void main(String[] args) {
+
+        //0.配置
+        Properties properties = new Properties();
+
+        properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "172.16.8.100:9092");
+        //设置序列化类型
+        properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+        properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+
+        //关联自定义分区器
+        properties.put(ProducerConfig.PARTITIONER_CLASS_CONFIG, MyPartitioner.class.getName());
+
+        //缓冲区大小
+        properties.put(ProducerConfig.BUFFER_MEMORY_CONFIG, 33554432);
+        //批次大小
+        properties.put(ProducerConfig.BATCH_SIZE_CONFIG, 16384);
+        //linger.ms
+        properties.put(ProducerConfig.LINGER_MS_CONFIG, 1);
+        //压缩类型
+        properties.put(ProducerConfig.COMPRESSION_TYPE_CONFIG, "snappy");
+
+
+        //1.创建kafka生产者对象
+        KafkaProducer<String, String> producer = new KafkaProducer<>(properties);
+
+        //2. 提交数据
+        for (int i = 0; i < 5; i++) {
+            producer.send(new ProducerRecord<>("first", "hello" + i), (metadata, exception) -> {
+                if (exception == null) {
+                    System.out.println("topic:" + metadata.topic() + ";partition:" + metadata.partition());
+                }
+            });
+            producer.send(new ProducerRecord<>("first", "eeee" + i), (metadata, exception) -> {
+                if (exception == null) {
+                    System.out.println("topic:" + metadata.topic() + ";partition:" + metadata.partition());
+                }
+            });
+        }
+
+        //3. 关闭资源
+        producer.close();
+    }
+}
+```
+
+### 3.6 数据可靠性
+
+![image-20230407162635202](kafka3.x学习.assets/image-20230407162635202.png)
+
+![image-20230407163040291](kafka3.x学习.assets/image-20230407163040291.png)
+
+![image-20230407163154449](kafka3.x学习.assets/image-20230407163154449.png)
+
+![image-20230407163355589](kafka3.x学习.assets/image-20230407163355589.png)
+
+```java
+        //ack类型
+        properties.put(ProducerConfig.ACKS_CONFIG, "1");
+
+        //重试次数
+        properties.put(ProducerConfig.RETRIES_CONFIG, 3);
+```
+
+### 3.7 数据去重
+
+![image-20230407163932053](kafka3.x学习.assets/image-20230407163932053.png)
+
+![image-20230407165206356](kafka3.x学习.assets/image-20230407165206356.png)
+
+```shell
+开启参数 enable.idempotence,默认为true;false关闭。
+```
+
+### 3.8 Kafka事务原理
 
