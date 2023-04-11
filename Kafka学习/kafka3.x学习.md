@@ -479,5 +479,9 @@ public class CustomProducer {
 开启参数 enable.idempotence,默认为true;false关闭。
 ```
 
-### 3.8 Kafka事务原理
+#### 3.7.1 生产者事务
+
+![image-20230411152846685](kafka3.x学习.assets/image-20230411152846685.png)
+
+![image-20230411152914885](kafka3.x学习.assets/image-20230411152914885.png)
 
