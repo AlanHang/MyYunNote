@@ -597,3 +597,23 @@ public class ProducerTransaction {
 
 ![image-20230413173811562](kafka3.x学习.assets/image-20230413173811562.png)
 
+## 5 Kafka Consumer
+
+### 5.1 kafka消费方式
+
+![image-20230414112755470](kafka3.x学习.assets/image-20230414112755470.png)
+
+### 5.2 消费者组工作流程
+
+#### 5.2.1 总体工作流程
+
+![image-20230414171820367](kafka3.x学习.assets/image-20230414171820367.png)
+
+#### 5.2.2 消费者组原理
+
+![image-20230414174913990](kafka3.x学习.assets/image-20230414174913990.png)
+
+![image-20230414175022380](kafka3.x学习.assets/image-20230414175022380.png)
+
+![image-20230414175832537](kafka3.x学习.assets/image-20230414175832537.png)
+
