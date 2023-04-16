@@ -479,5 +479,141 @@ public class CustomProducer {
 开启参数 enable.idempotence,默认为true;false关闭。
 ```
 
-### 3.8 Kafka事务原理
+#### 3.7.1 生产者事务
+
+![image-20230411152846685](kafka3.x学习.assets/image-20230411152846685.png)
+
+![image-20230411152914885](kafka3.x学习.assets/image-20230411152914885.png)
+
+```java
+package producer;
+
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.serialization.StringSerializer;
+
+import java.util.Properties;
+
+public class ProducerTransaction {
+
+    public static void main(String[] args) {
+        //0.配置
+        Properties properties = new Properties();
+
+        properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "172.16.8.100:9092");
+        //设置序列化类型
+        properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+        properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+        //指定事务id
+        properties.put(ProducerConfig.TRANSACTIONAL_ID_CONFIG, "transaction_id");
+        KafkaProducer<String, String> producer = new KafkaProducer<>(properties);
+        //开启事务
+        producer.initTransactions();
+        producer.beginTransaction();
+        //2. 提交数据
+        try {
+            for (int i = 0; i < 5; i++) {
+                producer.send(new ProducerRecord<>("first", "hello" + i));
+            }
+            producer.commitTransaction();
+        } catch (Exception e) {
+            producer.abortTransaction();
+        } finally {
+            producer.close();
+        }
+
+    }
+
+}
+```
+
+### 3.8 数据有序
+
+![image-20230412095507719](kafka3.x学习.assets/image-20230412095507719.png)
+
+### 3.9 数据乱序
+
+![image-20230412095937847](kafka3.x学习.assets/image-20230412095937847.png)
+
+## 4 Kafka Broker
+
+### 4.1 Kafka Borker工作流程
+
+#### 4.1.1 Zookeeper中存储的信息
+
+![image-20230412101424326](kafka3.x学习.assets/image-20230412101424326.png)
+
+#### 4.1.2 KafkaBroker总体的工作流程
+
+![image-20230412102038403](kafka3.x学习.assets/image-20230412102038403.png)
+
+### 4.2 Kafka副本
+
+#### 4.2.1 Kafka副本基本信息
+
+![image-20230413110748927](kafka3.x学习.assets/image-20230413110748927.png)
+
+#### 4.2.2 Leader选举流程
+
+![image-20230413155347776](kafka3.x学习.assets/image-20230413155347776.png)
+
+#### 4.2.3 Leader和Follower故障处理细节
+
+**Follower故障处理细节**
+
+![image-20230413160422821](kafka3.x学习.assets/image-20230413160422821.png)
+
+**Leader故障处理细节**
+
+![image-20230413160732682](kafka3.x学习.assets/image-20230413160732682.png)
+
+#### 4.2.4 Leader Partition自动平衡
+
+![image-20230413171208841](kafka3.x学习.assets/image-20230413171208841.png)
+
+### 4.3 文件存储
+
+#### 4.3.1 文件存储机制
+
+![image-20230413171857376](kafka3.x学习.assets/image-20230413171857376.png)
+
+![image-20230413172428280](kafka3.x学习.assets/image-20230413172428280.png)
+
+#### 4.3.2 文件清除策略
+
+![image-20230413172748860](kafka3.x学习.assets/image-20230413172748860.png)
+
+![image-20230413172850368](kafka3.x学习.assets/image-20230413172850368.png)
+
+![image-20230413173247970](kafka3.x学习.assets/image-20230413173247970.png)
+
+### 4.4 高效读写数据
+
+1. Kafka本身是分布式集群，可以采用分区技术，并行度高。
+2. 读取数据采用稀疏索引，可以快速定位消费的数据。
+3. 顺序写磁盘。
+4. 页缓存和零拷贝技术。
+
+![image-20230413173811562](kafka3.x学习.assets/image-20230413173811562.png)
+
+## 5 Kafka Consumer
+
+### 5.1 kafka消费方式
+
+![image-20230414112755470](kafka3.x学习.assets/image-20230414112755470.png)
+
+### 5.2 消费者组工作流程
+
+#### 5.2.1 总体工作流程
+
+![image-20230414171820367](kafka3.x学习.assets/image-20230414171820367.png)
+
+#### 5.2.2 消费者组原理
+
+![image-20230414174913990](kafka3.x学习.assets/image-20230414174913990.png)
+
+![image-20230414175022380](kafka3.x学习.assets/image-20230414175022380.png)
+
+![image-20230414175832537](kafka3.x学习.assets/image-20230414175832537.png)
 
