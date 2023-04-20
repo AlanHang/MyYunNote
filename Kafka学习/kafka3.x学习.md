@@ -615,5 +615,403 @@ public class ProducerTransaction {
 
 ![image-20230414175022380](kafka3.x学习.assets/image-20230414175022380.png)
 
+**消费者组初始化流程**
+
 ![image-20230414175832537](kafka3.x学习.assets/image-20230414175832537.png)
+
+**消费者组详细消费流程**
+
+![image-20230417154939610](kafka3.x学习.assets/image-20230417154939610.png)
+
+### 5.3 消费者API
+
+#### 5.3.1 订阅主题
+
+```java
+package producer;
+
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.serialization.StringDeserializer;
+
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Properties;
+
+public class CustomConsumer {
+    public static void main(String[] args) {
+        //0 配置
+        Properties properties = new Properties();
+
+        //连接
+        properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "172.16.8.100:9092");
+
+        //反序列化
+        properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+        properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+
+        //配置消费者组id
+        properties.put(ConsumerConfig.GROUP_ID_CONFIG, "test");
+
+        //1 创建一个消费者
+        KafkaConsumer<String, String> consumer = new KafkaConsumer<>(properties);
+
+        //2 定义主题 first
+        ArrayList<String> topics = new ArrayList<>();
+        topics.add("first");
+        consumer.subscribe(topics);
+
+        while (true) {
+            ConsumerRecords<String, String> consumerRecords = consumer.poll(Duration.ofSeconds(1));
+
+            for (ConsumerRecord<String, String> record : consumerRecords) {
+                System.out.println(record);
+            }
+        }
+    }
+}
+```
+
+#### 5.3.2 订阅分区
+
+```java
+package producer;
+
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.TopicPartition;
+import org.apache.kafka.common.serialization.StringDeserializer;
+
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+
+public class CustomConsumer {
+    public static void main(String[] args) {
+        //0 配置
+        Properties properties = new Properties();
+
+        //连接
+        properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "172.16.8.100:9092");
+
+        //反序列化
+        properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+        properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+
+        //配置消费者组id
+        properties.put(ConsumerConfig.GROUP_ID_CONFIG, "test");
+
+        //1 创建一个消费者
+        KafkaConsumer<String, String> consumer = new KafkaConsumer<>(properties);
+
+        //2 订阅分区
+        List<TopicPartition> topicPartitions = new ArrayList<>();
+        topicPartitions.add(new TopicPartition("first",0));
+        consumer.assign(topicPartitions);
+
+        while (true) {
+            ConsumerRecords<String, String> consumerRecords = consumer.poll(Duration.ofSeconds(1));
+
+            for (ConsumerRecord<String, String> record : consumerRecords) {
+                System.out.println(record);
+            }
+        }
+    }
+}
+```
+
+#### 5.3.3 消费者组
+
+**消费者配置同一个消费者组id将自动形成一个消费者组。**
+
+### 5.4 分区分配策略
+
+![image-20230418175231668](kafka3.x学习.assets/image-20230418175231668.png)
+
+#### 5.4.1 Range
+
+![image-20230418175407016](kafka3.x学习.assets/image-20230418175407016.png)
+
+#### 5.4.2 RoundRobin
+
+![image-20230419174143253](kafka3.x学习.assets/image-20230419174143253.png)
+
+```java
+package producer;
+
+import org.apache.kafka.clients.consumer.*;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.TopicPartition;
+import org.apache.kafka.common.serialization.StringDeserializer;
+
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+
+public class CustomConsumer {
+    public static void main(String[] args) {
+        //0 配置
+        Properties properties = new Properties();
+
+        //连接
+        properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "172.16.8.100:9092");
+
+        //反序列化
+        properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+        properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+
+        //配置消费者组id
+        properties.put(ConsumerConfig.GROUP_ID_CONFIG, "test");
+
+        properties.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG, RoundRobinAssignor.class);
+
+        //1 创建一个消费者
+        KafkaConsumer<String, String> consumer = new KafkaConsumer<>(properties);
+
+        //2 定义主题 first
+        ArrayList<String> topics = new ArrayList<>();
+        topics.add("first");
+        consumer.subscribe(topics);
+
+        while (true) {
+            ConsumerRecords<String, String> consumerRecords = consumer.poll(Duration.ofSeconds(1));
+
+            for (ConsumerRecord<String, String> record : consumerRecords) {
+                System.out.println(record);
+            }
+        }
+    }
+}
+```
+
+#### 5.4.3 Sticky
+
+```java
+properties.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG,org.apache.kafka.clients.consumer.StickyAssignor);
+```
+
+![image-20230420142232878](kafka3.x学习.assets/image-20230420142232878.png)
+
+### 5.5 offset位移
+
+![image-20230420142530040](kafka3.x学习.assets/image-20230420142530040.png)
+
+![image-20230420142605405](kafka3.x学习.assets/image-20230420142605405.png)
+
+#### 5.5.1 自动提交offset
+
+![image-20230420143136787](kafka3.x学习.assets/image-20230420143136787.png)
+
+```java
+        properties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG,true);
+        properties.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG,1000);
+```
+
+#### 5.5.2 手动提交offset
+
+![image-20230420143509965](kafka3.x学习.assets/image-20230420143509965.png)
+
+```java
+package producer;
+
+import org.apache.kafka.clients.consumer.*;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.TopicPartition;
+import org.apache.kafka.common.serialization.StringDeserializer;
+
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+
+public class CustomConsumer {
+    public static void main(String[] args) {
+        //0 配置
+        Properties properties = new Properties();
+
+        //连接
+        properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "172.16.8.100:9092");
+
+        //反序列化
+        properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+        properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+
+        //配置消费者组id
+        properties.put(ConsumerConfig.GROUP_ID_CONFIG, "test");
+
+        properties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG,false);
+
+        //1 创建一个消费者
+        KafkaConsumer<String, String> consumer = new KafkaConsumer<>(properties);
+
+        //2 定义主题 first
+        ArrayList<String> topics = new ArrayList<>();
+        topics.add("first");
+        consumer.subscribe(topics);
+
+        while (true) {
+            ConsumerRecords<String, String> consumerRecords = consumer.poll(Duration.ofSeconds(1));
+
+            for (ConsumerRecord<String, String> record : consumerRecords) {
+                System.out.println(record);
+            }
+            
+            //手动提交offset,同步提交
+            consumer.commitSync();
+            //异步提交
+            //consumer.commitAsync();
+        }
+    }
+}
+```
+
+#### 5.5.3 指定offset消费
+
+![image-20230420143823617](kafka3.x学习.assets/image-20230420143823617.png)
+
+```java
+package producer;
+
+import org.apache.kafka.clients.consumer.*;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.TopicPartition;
+import org.apache.kafka.common.serialization.StringDeserializer;
+
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
+
+public class CustomConsumer {
+    public static void main(String[] args) {
+        //0 配置
+        Properties properties = new Properties();
+
+        //连接
+        properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "172.16.8.100:9092");
+
+        //反序列化
+        properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+        properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+
+        //配置消费者组id
+        properties.put(ConsumerConfig.GROUP_ID_CONFIG, "test");
+
+        properties.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG, RoundRobinAssignor.class);
+
+        //1 创建一个消费者
+        KafkaConsumer<String, String> consumer = new KafkaConsumer<>(properties);
+
+        //2 定义主题 first
+        ArrayList<String> topics = new ArrayList<>();
+        topics.add("first");
+        consumer.subscribe(topics);
+
+        //执行offset消费
+        Set<TopicPartition> assignment = consumer.assignment();
+        //保证分区分配方案已经执行完毕
+        while (assignment.size() == 0){
+            consumer.poll(Duration.ofSeconds(1));
+            assignment = consumer.assignment();
+        }
+
+        for (TopicPartition topicPartition : assignment) {
+            consumer.seek(topicPartition, 100);
+        }
+        while (true) {
+            ConsumerRecords<String, String> consumerRecords = consumer.poll(Duration.ofSeconds(1));
+
+            for (ConsumerRecord<String, String> record : consumerRecords) {
+                System.out.println(record);
+            }
+        }
+    }
+}
+```
+
+#### 5.5.4 执行时间消费
+
+```java
+package producer;
+
+import org.apache.kafka.clients.consumer.*;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.TopicPartition;
+import org.apache.kafka.common.serialization.StringDeserializer;
+
+import java.time.Duration;
+import java.util.*;
+
+public class CustomConsumer {
+    public static void main(String[] args) {
+        //0 配置
+        Properties properties = new Properties();
+
+        //连接
+        properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "172.16.8.100:9092");
+
+        //反序列化
+        properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+        properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+
+        //配置消费者组id
+        properties.put(ConsumerConfig.GROUP_ID_CONFIG, "test");
+
+        properties.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG, RoundRobinAssignor.class);
+
+        //1 创建一个消费者
+        KafkaConsumer<String, String> consumer = new KafkaConsumer<>(properties);
+
+        //2 定义主题 first
+        ArrayList<String> topics = new ArrayList<>();
+        topics.add("first");
+        consumer.subscribe(topics);
+
+        //执行offset消费
+        Set<TopicPartition> assignment = consumer.assignment();
+
+        //保证分区分配方案已经执行完毕
+        while (assignment.size() == 0) {
+            consumer.poll(Duration.ofSeconds(1));
+            assignment = consumer.assignment();
+        }
+
+        //把时间转换为对应的offset
+        HashMap<TopicPartition, Long> topicPartitionLongHashMap = new HashMap<>();
+        for (TopicPartition topicPartition : assignment) {
+            //获取一天前
+            topicPartitionLongHashMap.put(topicPartition, System.currentTimeMillis() - 24 * 3600 * 1000);
+        }
+        Map<TopicPartition, OffsetAndTimestamp> topicPartitionOffsetAndTimestampMap = consumer.offsetsForTimes(topicPartitionLongHashMap);
+
+        for (TopicPartition topicPartition : assignment) {
+            OffsetAndTimestamp offsetAndTimestamp = topicPartitionOffsetAndTimestampMap.get(topicPartition);
+            consumer.seek(topicPartition, offsetAndTimestamp.offset());
+        }
+        
+        while (true) {
+            ConsumerRecords<String, String> consumerRecords = consumer.poll(Duration.ofSeconds(1));
+
+            for (ConsumerRecord<String, String> record : consumerRecords) {
+                System.out.println(record);
+            }
+        }
+    }
+}
+```
+
+#### 5.5.5 漏消费和重复消费
+
+![image-20230420145606250](kafka3.x学习.assets/image-20230420145606250.png)
+
+![image-20230420145739004](kafka3.x学习.assets/image-20230420145739004.png)
 
