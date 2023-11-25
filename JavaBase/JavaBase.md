@@ -2,16 +2,16 @@
 
 <div style = "page-break-after:always;"></div>
 
-# 1. Java基础
+# 1. JavaBase
 
 **JDK、JRE和JVM之间的关系**
 
 - Java Development Kit ，提供给Java开发人员使用，其中包含了Java的开发工具，也包含了JRE。开发工具：编译工具（javac.exe)，打包工具（jar.exe）等。
 - Java Runtime Environment，包括了Java虚拟机（Java Virtual Machine）和Java的核心类库，如果想要运行一个Java程序，只需要安装JRE即可。
 
-![image-20210301215211564](Java基础.assets/image-20210301215211564.png)
+![image-20210301215211564](JavaBase.assets/image-20210301215211564.png)
 
-![image-20210301215257347](Java基础.assets/image-20210301215257347.png)
+![image-20210301215257347](JavaBase.assets/image-20210301215257347.png)
 
 **面向对象三要素** 
 
@@ -60,27 +60,27 @@
 
 # 2.IDEA 设置
 
-![image-20210328204052622](Java基础.assets/image-20210328204052622.png)
+![image-20210328204052622](JavaBase.assets/image-20210328204052622.png)
 
-![image-20210328204131724](Java基础.assets/image-20210328204131724.png)
+![image-20210328204131724](JavaBase.assets/image-20210328204131724.png)
 
-![image-20210328204252486](Java基础.assets/image-20210328204252486.png)
+![image-20210328204252486](JavaBase.assets/image-20210328204252486.png)
 
-![image-20210328204333620](Java基础.assets/image-20210328204333620.png)
+![image-20210328204333620](JavaBase.assets/image-20210328204333620.png)
 
 忽略大小写提示，取消match case
 
-![image-20210328204532038](Java基础.assets/image-20210328204532038.png)
+![image-20210328204532038](JavaBase.assets/image-20210328204532038.png)
 
-![image-20210328204601330](Java基础.assets/image-20210328204601330.png)
+![image-20210328204601330](JavaBase.assets/image-20210328204601330.png)
 
-![image-20210328204654417](Java基础.assets/image-20210328204654417.png)
+![image-20210328204654417](JavaBase.assets/image-20210328204654417.png)
 
-![image-20210328204801430](Java基础.assets/image-20210328204801430.png)
+![image-20210328204801430](JavaBase.assets/image-20210328204801430.png)
 
-![image-20210328204847272](Java基础.assets/image-20210328204847272.png)
+![image-20210328204847272](JavaBase.assets/image-20210328204847272.png)
 
-![image-20210328204930176](Java基础.assets/image-20210328204930176.png)
+![image-20210328204930176](JavaBase.assets/image-20210328204930176.png)
 
 # 3.多线程
 
@@ -111,9 +111,9 @@
 
 ---
 
-![image-20210328205214175](Java基础.assets/image-20210328205214175.png)
+![image-20210328205214175](JavaBase.assets/image-20210328205214175.png)
 
-![image-20210328205557993](Java基础.assets/image-20210328205557993.png)
+![image-20210328205557993](JavaBase.assets/image-20210328205557993.png)
 
 ## 3.2 线程的创建和使用
 
@@ -326,7 +326,7 @@ JDK中用Thread.State类定义了线程的几种状态
 - 阻塞：在某种特殊情况下，被人为挂起或执行输入输出操作时，让出CPU并临时中止自己的执行，进入阻塞状态。
 - 死亡：线程完成了它的全部工作或线程被提前强制性地终止或出现异常导致结束。
 
-![image-20210401222740950](Java基础.assets/image-20210401222740950.png)
+![image-20210401222740950](JavaBase.assets/image-20210401222740950.png)
 
 ### 3.2.5 线程的同步
 
@@ -463,9 +463,9 @@ class Number implements Runnable{
 
 ### 3.2.8 实现Callable接口
 
-![image-20210725180754435](Java基础.assets/image-20210725180754435.png)
+![image-20210725180754435](JavaBase.assets/image-20210725180754435.png)
 
-![image-20210725182616103](Java基础.assets/image-20210725182616103.png)
+![image-20210725182616103](JavaBase.assets/image-20210725182616103.png)
 
 ```java
 /**
@@ -503,9 +503,9 @@ public Class ThreadNew{
 
 ### 3.2.9 使用线程池
 
-![image-20210725183912515](Java基础.assets/image-20210725183912515.png)
+![image-20210725183912515](JavaBase.assets/image-20210725183912515.png)
 
-![image-20210725190252333](Java基础.assets/image-20210725190252333.png)
+![image-20210725190252333](JavaBase.assets/image-20210725190252333.png)
 
 ``` java
 /**

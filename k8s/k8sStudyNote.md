@@ -4,7 +4,7 @@
 
 Kubernetes集群包含有节点代理kubelet和Master组件(APIs, scheduler, etc)，一切都基于分布式的存储系统。
 
-![image-20220308194750416](k8s学习笔记.assets/image-20220308194750416.png)
+![image-20220308194750416](k8sStudyNote.assets/image-20220308194750416.png)
 
 **Kubernetes节点**
 在这张系统架构图中，我们把服务分为运行在工作节点上的服务和组成集群级别控制板的服务。

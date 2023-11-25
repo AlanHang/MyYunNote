@@ -27,7 +27,7 @@
 
 数据库管理系统可以管理多个数据库，一般开发人员会针对每一个应用创建一个数据库，为保存应用中实体的数据，一般会在数据库中创建多个表，以保存程序中实体用户的数据。
 
-![image-20220313150529607](mysql学习.assets/image-20220313150529607.png)
+![image-20220313150529607](mysql.assets/image-20220313150529607.png)
 
 ## 3 关系型数据库和非关系型数据库
 
@@ -60,31 +60,31 @@
 
 > 文档型数据库
 
-![image-20220313170858340](mysql学习.assets/image-20220313170858340.png)
+![image-20220313170858340](mysql.assets/image-20220313170858340.png)
 
 > 搜索引擎数据库
 
-![image-20220313170924666](mysql学习.assets/image-20220313170924666.png)
+![image-20220313170924666](mysql.assets/image-20220313170924666.png)
 
 > 列式数据库
 
-![image-20220313171006277](mysql学习.assets/image-20220313171006277.png)
+![image-20220313171006277](mysql.assets/image-20220313171006277.png)
 
 >  图形数据库
 
-![image-20220313171335764](mysql学习.assets/image-20220313171335764.png)
+![image-20220313171335764](mysql.assets/image-20220313171335764.png)
 
 NoSQL的演变
 
-![image-20220313171511664](mysql学习.assets/image-20220313171511664.png)
+![image-20220313171511664](mysql.assets/image-20220313171511664.png)
 
 ## 4 关系型数据库设计规则
 
-![image-20220313171620389](mysql学习.assets/image-20220313171620389.png)
+![image-20220313171620389](mysql.assets/image-20220313171620389.png)
 
 ### 4.1  表、记录、字段
 
-![image-20220313171754191](mysql学习.assets/image-20220313171754191.png)
+![image-20220313171754191](mysql.assets/image-20220313171754191.png)
 
 ### 4.2 表的关联关系
 
@@ -93,41 +93,41 @@ NoSQL的演变
 
 #### 4.2.1 一对一关联
 
-![image-20220313195856600](mysql学习.assets/image-20220313195856600.png)
+![image-20220313195856600](mysql.assets/image-20220313195856600.png)
 
 #### 4.2.2 一对多关系
 
-![image-20220313200000562](mysql学习.assets/image-20220313200000562.png)
+![image-20220313200000562](mysql.assets/image-20220313200000562.png)
 
 #### 4.2.3 多对多关系
 
-![image-20220313200145600](mysql学习.assets/image-20220313200145600.png)
+![image-20220313200145600](mysql.assets/image-20220313200145600.png)
 
 #### 4.2.4 自我引用
 
-![image-20220313200256360](mysql学习.assets/image-20220313200256360.png)
+![image-20220313200256360](mysql.assets/image-20220313200256360.png)
 
 # MySQL环境搭建
 
 ## 1. MySQL 卸载
 
-![image-20220313202506969](mysql学习.assets/image-20220313202506969.png)
+![image-20220313202506969](mysql.assets/image-20220313202506969.png)
 
-![image-20220313202606145](mysql学习.assets/image-20220313202606145.png)
+![image-20220313202606145](mysql.assets/image-20220313202606145.png)
 
-![image-20220313202720229](mysql学习.assets/image-20220313202720229.png)
+![image-20220313202720229](mysql.assets/image-20220313202720229.png)
 
-![image-20220313202909444](mysql学习.assets/image-20220313202909444.png)
+![image-20220313202909444](mysql.assets/image-20220313202909444.png)
 
-![image-20220313202927535](mysql学习.assets/image-20220313202927535.png)
+![image-20220313202927535](mysql.assets/image-20220313202927535.png)
 
-![image-20220313202955575](mysql学习.assets/image-20220313202955575.png)
+![image-20220313202955575](mysql.assets/image-20220313202955575.png)
 
 ## 2. MySQL的下载、安装、配置
 
 ### 2.1 MySQL的4大版本
 
-![image-20220313203229931](mysql学习.assets/image-20220313203229931.png)
+![image-20220313203229931](mysql.assets/image-20220313203229931.png)
 
 ### 2.2 MySQL下载
 
@@ -135,61 +135,61 @@ NoSQL的演变
 
 ### 2.3 安装步骤
 
-![image-20220313211327352](mysql学习.assets/image-20220313211327352.png)
+![image-20220313211327352](mysql.assets/image-20220313211327352.png)
 
-![image-20220313211428327](mysql学习.assets/image-20220313211428327.png)
+![image-20220313211428327](mysql.assets/image-20220313211428327.png)
 
-![image-20220313211459660](mysql学习.assets/image-20220313211459660.png)
+![image-20220313211459660](mysql.assets/image-20220313211459660.png)
 
-![image-20220313211514771](mysql学习.assets/image-20220313211514771.png)
+![image-20220313211514771](mysql.assets/image-20220313211514771.png)
 
-![image-20220313211526701](mysql学习.assets/image-20220313211526701.png)
+![image-20220313211526701](mysql.assets/image-20220313211526701.png)
 
-![image-20220313211541379](mysql学习.assets/image-20220313211541379.png)
+![image-20220313211541379](mysql.assets/image-20220313211541379.png)
 
 ### 2.4 配置Mysql
 
-![image-20220313211629425](mysql学习.assets/image-20220313211629425.png)
+![image-20220313211629425](mysql.assets/image-20220313211629425.png)
 
-![image-20220313211648502](mysql学习.assets/image-20220313211648502.png)
+![image-20220313211648502](mysql.assets/image-20220313211648502.png)
 
-![image-20220313211700880](mysql学习.assets/image-20220313211700880.png)
+![image-20220313211700880](mysql.assets/image-20220313211700880.png)
 
-![image-20220313211710508](mysql学习.assets/image-20220313211710508.png)
+![image-20220313211710508](mysql.assets/image-20220313211710508.png)
 
-![image-20220313211723280](mysql学习.assets/image-20220313211723280.png)
+![image-20220313211723280](mysql.assets/image-20220313211723280.png)
 
-![image-20220313211736855](mysql学习.assets/image-20220313211736855.png)
+![image-20220313211736855](mysql.assets/image-20220313211736855.png)
 
-![image-20220313211844092](mysql学习.assets/image-20220313211844092.png)
+![image-20220313211844092](mysql.assets/image-20220313211844092.png)
 
-![image-20220313211857712](mysql学习.assets/image-20220313211857712.png)
+![image-20220313211857712](mysql.assets/image-20220313211857712.png)
 
 ### 2.5 配置环境变量	
 
-![image-20220313211926082](mysql学习.assets/image-20220313211926082.png)
+![image-20220313211926082](mysql.assets/image-20220313211926082.png)
 
 ### 2.6 安装失败的原因
 
-![image-20220320140418997](mysql学习.assets/image-20220320140418997.png)
+![image-20220320140418997](mysql.assets/image-20220320140418997.png)
 
-![image-20220320140451202](mysql学习.assets/image-20220320140451202.png)
+![image-20220320140451202](mysql.assets/image-20220320140451202.png)
 
-![image-20220320140506535](mysql学习.assets/image-20220320140506535.png)
+![image-20220320140506535](mysql.assets/image-20220320140506535.png)
 
-![image-20220320140613610](mysql学习.assets/image-20220320140613610.png)
+![image-20220320140613610](mysql.assets/image-20220320140613610.png)
 
 ## 3. MySQL的登录
 
 ### 3.1 服务的启动与停止
 
-![image-20220320141139625](mysql学习.assets/image-20220320141139625.png)
+![image-20220320141139625](mysql.assets/image-20220320141139625.png)
 
-![image-20220320141232810](mysql学习.assets/image-20220320141232810.png)
+![image-20220320141232810](mysql.assets/image-20220320141232810.png)
 
 ### 3.2 客户端的登录与登出
 
-![image-20220320141545849](mysql学习.assets/image-20220320141545849.png)
+![image-20220320141545849](mysql.assets/image-20220320141545849.png)
 
 默认是root用户
 
@@ -203,17 +203,17 @@ mysql -u root -P3306 -h127.0.0.1 -p
 
 查看mysql版本
 
-![image-20220320142107483](mysql学习.assets/image-20220320142107483.png)
+![image-20220320142107483](mysql.assets/image-20220320142107483.png)
 
 查看mysql的编码格式
 
-![image-20220320143324649](mysql学习.assets/image-20220320143324649.png)
+![image-20220320143324649](mysql.assets/image-20220320143324649.png)
 
 ## 4. MySQL 图形化管理工具
 
 >  MySQL Workbench
 
-![image-20220320143516659](mysql学习.assets/image-20220320143516659.png)
+![image-20220320143516659](mysql.assets/image-20220320143516659.png)
 
 > Navicat
 
@@ -225,13 +225,13 @@ mysql -u root -P3306 -h127.0.0.1 -p
 
 ### 5.1 主要的目录结构
 
-![image-20220320144859616](mysql学习.assets/image-20220320144859616.png)
+![image-20220320144859616](mysql.assets/image-20220320144859616.png)
 
 ### 5.2 源代码获取
 
-![image-20220320145051638](mysql学习.assets/image-20220320145051638.png)
+![image-20220320145051638](mysql.assets/image-20220320145051638.png)
 
-![image-20220320145103408](mysql学习.assets/image-20220320145103408.png)
+![image-20220320145103408](mysql.assets/image-20220320145103408.png)
 
 # 基本的SELECT语句
 
@@ -239,15 +239,15 @@ mysql -u root -P3306 -h127.0.0.1 -p
 
 ### 1.1 SQL 背景知识
 
-​	![image-20220320163041385](mysql学习.assets/image-20220320163041385.png)
+​	![image-20220320163041385](mysql.assets/image-20220320163041385.png)
 
 ### 1.2 SQL语言排行榜
 
-![image-20220320163811344](mysql学习.assets/image-20220320163811344.png)
+![image-20220320163811344](mysql.assets/image-20220320163811344.png)
 
 ### 1.3 SQL分类
 
-![image-20220320163923167](mysql学习.assets/image-20220320163923167.png)
+![image-20220320163923167](mysql.assets/image-20220320163923167.png)
 
 - DDL
 
@@ -265,11 +265,11 @@ mysql -u root -P3306 -h127.0.0.1 -p
 
 ### 2.1 基本规则
 
-![image-20220320165624945](mysql学习.assets/image-20220320165624945.png)
+![image-20220320165624945](mysql.assets/image-20220320165624945.png)
 
 ### 2.2 基本规范
 
-![image-20220320165754663](mysql学习.assets/image-20220320165754663.png)
+![image-20220320165754663](mysql.assets/image-20220320165754663.png)
 
 ### 2.3 注释
 
@@ -281,7 +281,7 @@ mysql -u root -P3306 -h127.0.0.1 -p
 
 ### 2.4 命名规则
 
-![image-20220320170310477](mysql学习.assets/image-20220320170310477.png)
+![image-20220320170310477](mysql.assets/image-20220320170310477.png)
 
 ### 2.5 数据导入指令
 
@@ -356,7 +356,7 @@ WHERE
 
 ## 1. 算数运算符
 
-![image-20220320175342295](mysql学习.assets/image-20220320175342295.png)
+![image-20220320175342295](mysql.assets/image-20220320175342295.png)
 
 ## 2. 比较运算符
 
@@ -364,27 +364,27 @@ WHERE
 
 比较运算符经常被用来作为SELECT查询语句的条件来使用，返回符合条件的结果记录。
 
-![image-20220320180233689](mysql学习.assets/image-20220320180233689.png)
+![image-20220320180233689](mysql.assets/image-20220320180233689.png)
 
-![image-20220320180609084](mysql学习.assets/image-20220320180609084.png)
+![image-20220320180609084](mysql.assets/image-20220320180609084.png)
 
-![image-20220320180825826](mysql学习.assets/image-20220320180825826.png)
+![image-20220320180825826](mysql.assets/image-20220320180825826.png)
 
-![image-20220326214833652](mysql学习.assets/image-20220326214833652.png)
+![image-20220326214833652](mysql.assets/image-20220326214833652.png)
 
-​	![image-20220327161624860](mysql学习.assets/image-20220327161624860.png)
+​	![image-20220327161624860](mysql.assets/image-20220327161624860.png)
 
 ## 3. 逻辑运算符
 
-![image-20220327162239076](mysql学习.assets/image-20220327162239076.png)
+![image-20220327162239076](mysql.assets/image-20220327162239076.png)
 
 ## 4. 位运算符
 
-![image-20220327162401105](mysql学习.assets/image-20220327162401105.png)
+![image-20220327162401105](mysql.assets/image-20220327162401105.png)
 
 ## 5. 运算符优先级
 
-![image-20220327162600043](mysql学习.assets/image-20220327162600043.png)
+![image-20220327162600043](mysql.assets/image-20220327162600043.png)
 
 数字编号越大，优先级越高，优先级高的运算符先进行计算。可以看到，赋值运算符的优先级最低，使 用“()”括起来的表达式的优先级最高。
 

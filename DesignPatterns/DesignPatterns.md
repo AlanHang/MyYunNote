@@ -69,7 +69,7 @@
 
 1. 饿汉式（静态常量）:
 
-   ![image-20230404214058748](设计模式.assets/image-20230404214058748.png)
+   ![image-20230404214058748](DesignPatterns.assets/image-20230404214058748.png)
 
    ```java
    package singleton;
@@ -91,7 +91,7 @@
 
 2. 饿汉式(静态代码块)
 
-   ![image-20230404214607394](设计模式.assets/image-20230404214607394.png)
+   ![image-20230404214607394](DesignPatterns.assets/image-20230404214607394.png)
 
    ```java
    package singleton;
@@ -118,7 +118,7 @@
 
 3. 懒汉式(线程不安全)
 
-   ![image-20230404215258131](设计模式.assets/image-20230404215258131.png)
+   ![image-20230404215258131](DesignPatterns.assets/image-20230404215258131.png)
 
    ```java
    package singleton;
@@ -140,7 +140,7 @@
 
 4. 懒汉式(线程安全，同步方法)
 
-   ![image-20230404215513072](设计模式.assets/image-20230404215513072.png)
+   ![image-20230404215513072](DesignPatterns.assets/image-20230404215513072.png)
 
    ```java
    package singleton;
@@ -162,7 +162,7 @@
 
 5. 懒汉式（双重检查）
 
-   ![image-20230404215900381](设计模式.assets/image-20230404215900381.png)
+   ![image-20230404215900381](DesignPatterns.assets/image-20230404215900381.png)
 
    ```java
    package singleton;
@@ -188,7 +188,7 @@
 
 6. 静态内部类
 
-   ![image-20230404220230868](设计模式.assets/image-20230404220230868.png)
+   ![image-20230404220230868](DesignPatterns.assets/image-20230404220230868.png)
 
    ```java
    package singleton;
@@ -209,7 +209,7 @@
 
 7. 枚举类
 
-   ![image-20230404220739770](设计模式.assets/image-20230404220739770.png)
+   ![image-20230404220739770](DesignPatterns.assets/image-20230404220739770.png)
 
    ```java
    package singleton;
@@ -227,7 +227,7 @@
 
 ### 3.2.1 简单工厂模式
 
-![image-20230405085408782](设计模式.assets/image-20230405085408782.png)
+![image-20230405085408782](DesignPatterns.assets/image-20230405085408782.png)
 
 ```java
 package factory.simple;
@@ -320,7 +320,7 @@ public class OrderPisa {
 
 ### 3.2.2 抽象工厂模式
 
-![image-20230405092118837](设计模式.assets/image-20230405092118837.png)
+![image-20230405092118837](DesignPatterns.assets/image-20230405092118837.png)
 
 ```java
 package factory.abstracted;
@@ -453,7 +453,7 @@ public class OrderPizza {
 
 ## 3.3 克隆模式
 
-![image-20230405100152232](设计模式.assets/image-20230405100152232.png)
+![image-20230405100152232](DesignPatterns.assets/image-20230405100152232.png)
 
 ```java
 package propotype;
@@ -524,13 +524,13 @@ public class Sheep implements Cloneable {
 
   与工厂模式的区别是：建造者模式更加关注与零件装配的顺序。
 
-![image-20230405165109382](设计模式.assets/image-20230405165109382.png)
+![image-20230405165109382](DesignPatterns.assets/image-20230405165109382.png)
 
-![image-20230405165013340](设计模式.assets/image-20230405165013340.png)
+![image-20230405165013340](DesignPatterns.assets/image-20230405165013340.png)
 
 **案例：**
 
-![image-20230405165158825](设计模式.assets/image-20230405165158825.png)
+![image-20230405165158825](DesignPatterns.assets/image-20230405165158825.png)
 
 ```java
 package builder;
@@ -637,29 +637,29 @@ public class Client {
 }
 ```
 
-![image-20230405170909853](设计模式.assets/image-20230405170909853.png)
+![image-20230405170909853](DesignPatterns.assets/image-20230405170909853.png)
 
 建造者模式除了上面的用途外，在开发中还有一个常用的使用方式，当一个类的构造器需要传入很多参数时，如果构建这个类的实例可读性会非常差，而且容易引入错误，此时可以使用建造者模式重构。
 
 ## 3.5 总结
 
-![image-20230405172319236](设计模式.assets/image-20230405172319236.png)
+![image-20230405172319236](DesignPatterns.assets/image-20230405172319236.png)
 
 # 4 结构型模式
 
-![image-20230405174051538](设计模式.assets/image-20230405174051538.png)
+![image-20230405174051538](DesignPatterns.assets/image-20230405174051538.png)
 
 ## 4.1 代理模式
 
-![image-20230405174151632](设计模式.assets/image-20230405174151632.png)
+![image-20230405174151632](DesignPatterns.assets/image-20230405174151632.png)
 
 ### 4.1.1 静态代理
 
-![image-20230405192429247](设计模式.assets/image-20230405192429247.png)
+![image-20230405192429247](DesignPatterns.assets/image-20230405192429247.png)
 
 ### 4.1.2 JDK动态代理
 
-![image-20230405193228915](设计模式.assets/image-20230405193228915.png)
+![image-20230405193228915](DesignPatterns.assets/image-20230405193228915.png)
 
 ```java
 package proxy.jdkproxy;
@@ -701,7 +701,7 @@ public class ProxyFactory {
 
 ### 4.1.3 CGLIB动态代理
 
-![image-20230405195006200](设计模式.assets/image-20230405195006200.png)
+![image-20230405195006200](DesignPatterns.assets/image-20230405195006200.png)
 
 ```java
 package proxy.cglibproxy;
@@ -747,27 +747,27 @@ public class ProxyFactory implements MethodInterceptor {
 
 ### 4.1.4 三种代理的对比
 
-![image-20230405203023278](设计模式.assets/image-20230405203023278.png)
+![image-20230405203023278](DesignPatterns.assets/image-20230405203023278.png)
 
 ### 4.1.5 优缺点
 
-![image-20230405203238657](设计模式.assets/image-20230405203238657.png)
+![image-20230405203238657](DesignPatterns.assets/image-20230405203238657.png)
 
 ### 4.1.6 使用场景
 
-![image-20230405203325443](设计模式.assets/image-20230405203325443.png)
+![image-20230405203325443](DesignPatterns.assets/image-20230405203325443.png)
 
 ## 4.2 适配器模式
 
-![image-20230405212328513](设计模式.assets/image-20230405212328513.png)
+![image-20230405212328513](DesignPatterns.assets/image-20230405212328513.png)
 
-![image-20230405212456580](设计模式.assets/image-20230405212456580.png)
+![image-20230405212456580](DesignPatterns.assets/image-20230405212456580.png)
 
 ### 4.2.1 类适配器模式
 
 实现方式：定义一个适配器类来实现当前系统的业务接口，同时又继承现有的组件库中已经存在的组件。
 
-![image-20230405212803595](设计模式.assets/image-20230405212803595.png)
+![image-20230405212803595](DesignPatterns.assets/image-20230405212803595.png)
 
 ```java
 package adapter.classadapter;
@@ -861,7 +861,7 @@ public class Client {
 
 ### 4.2.2 对象适配器模式
 
-![image-20230405214433072](设计模式.assets/image-20230405214433072.png)
+![image-20230405214433072](DesignPatterns.assets/image-20230405214433072.png)
 
 ```java
 package adapter.objectadapter;
@@ -895,19 +895,19 @@ public class SDAdapterTF implements SDCard {
 
 ### 4.2.3 应用场景
 
-![image-20230405220219325](设计模式.assets/image-20230405220219325.png)
+![image-20230405220219325](DesignPatterns.assets/image-20230405220219325.png)
 
-![image-20230405220446308](设计模式.assets/image-20230405220446308.png)
+![image-20230405220446308](DesignPatterns.assets/image-20230405220446308.png)
 
 ## 4.3 装饰者模式
 
 定义：指在不改变现有对象结构的情况下，动态地给对象增加一些职责(即增加其额外功能)的模式。
 
-![image-20230405221311054](设计模式.assets/image-20230405221311054.png)
+![image-20230405221311054](DesignPatterns.assets/image-20230405221311054.png)
 
 ### 4.3.1 案例
 
-![image-20230405221647485](设计模式.assets/image-20230405221647485.png)
+![image-20230405221647485](DesignPatterns.assets/image-20230405221647485.png)
 
 ```java
 package decorator;
@@ -1051,27 +1051,27 @@ public class Client {
 
 
 
-![image-20230405224409848](设计模式.assets/image-20230405224409848.png)
+![image-20230405224409848](DesignPatterns.assets/image-20230405224409848.png)
 
 ### 4.3.2 使用场景
 
-![image-20230405224614624](设计模式.assets/image-20230405224614624.png)
+![image-20230405224614624](DesignPatterns.assets/image-20230405224614624.png)
 
-![image-20230405224811893](设计模式.assets/image-20230405224811893.png)
+![image-20230405224811893](DesignPatterns.assets/image-20230405224811893.png)
 
-![image-20230405224939456](设计模式.assets/image-20230405224939456.png)
+![image-20230405224939456](DesignPatterns.assets/image-20230405224939456.png)
 
 ### 4.3.3 代理和装饰者的区别
 
-![image-20230405225023697](设计模式.assets/image-20230405225023697.png)
+![image-20230405225023697](DesignPatterns.assets/image-20230405225023697.png)
 
 ## 4.4 桥接模式
 
   将抽象与实现分离，使他们可以独立变化。它是用组合关系代替继承关系来实现，从而降低了抽象和实现这两个可变维度的耦合度。
 
-![image-20230406193905014](设计模式.assets/image-20230406193905014.png)
+![image-20230406193905014](DesignPatterns.assets/image-20230406193905014.png)
 
-![image-20230406193921975](设计模式.assets/image-20230406193921975.png)
+![image-20230406193921975](DesignPatterns.assets/image-20230406193921975.png)
 
 ```java
 package brige;
@@ -1149,17 +1149,17 @@ public class Client {
 }
 ```
 
-![image-20230406194813152](设计模式.assets/image-20230406194813152.png)
+![image-20230406194813152](DesignPatterns.assets/image-20230406194813152.png)
 
 **使用场景**
 
-![image-20230406194856112](设计模式.assets/image-20230406194856112.png)
+![image-20230406194856112](DesignPatterns.assets/image-20230406194856112.png)
 
 ## 4.5 外观模式
 
-![image-20230406195210440](设计模式.assets/image-20230406195210440.png)
+![image-20230406195210440](DesignPatterns.assets/image-20230406195210440.png)
 
-![image-20230407201342515](设计模式.assets/image-20230407201342515.png)
+![image-20230407201342515](DesignPatterns.assets/image-20230407201342515.png)
 
 ```java
 package facade;
@@ -1251,39 +1251,39 @@ public class Client {
 }
 ```
 
-![image-20230407212801296](设计模式.assets/image-20230407212801296.png)
+![image-20230407212801296](DesignPatterns.assets/image-20230407212801296.png)
 
 **Tomcat中使用到的位置**
 
-![image-20230407212956023](设计模式.assets/image-20230407212956023.png)
+![image-20230407212956023](DesignPatterns.assets/image-20230407212956023.png)
 
 ## 4.6 组合模式
 
-![image-20230407230126186](设计模式.assets/image-20230407230126186.png)
+![image-20230407230126186](DesignPatterns.assets/image-20230407230126186.png)
 
-![image-20230407230324609](设计模式.assets/image-20230407230324609.png)
+![image-20230407230324609](DesignPatterns.assets/image-20230407230324609.png)
 
-![image-20230407230924617](设计模式.assets/image-20230407230924617.png)
+![image-20230407230924617](DesignPatterns.assets/image-20230407230924617.png)
 
 ## 4.7 享元模式
 
-![image-20230407231017785](设计模式.assets/image-20230407231017785.png)
+![image-20230407231017785](DesignPatterns.assets/image-20230407231017785.png)
 
-![image-20230407231233359](设计模式.assets/image-20230407231233359.png)
+![image-20230407231233359](DesignPatterns.assets/image-20230407231233359.png)
 
-![image-20230407231449994](设计模式.assets/image-20230407231449994.png)
+![image-20230407231449994](DesignPatterns.assets/image-20230407231449994.png)
 
-![image-20230407231326214](设计模式.assets/image-20230407231326214.png)
+![image-20230407231326214](DesignPatterns.assets/image-20230407231326214.png)
 
 # 5 行为型模式
 
-![image-20230407231657683](设计模式.assets/image-20230407231657683.png)
+![image-20230407231657683](DesignPatterns.assets/image-20230407231657683.png)
 
 ## 5.1 模板方法模式
 
   定义一个操作的算法骨架，而将算法的一些步骤延迟到子类中，使得子类可以不改变该算法结构的情况下重新定义该算法的某些特定步骤。
 
-![image-20230407232219072](设计模式.assets/image-20230407232219072.png)
+![image-20230407232219072](DesignPatterns.assets/image-20230407232219072.png)
 
 
 
@@ -1291,105 +1291,105 @@ public class Client {
 
   该模式定义了一系列算法，并将每个算法封装起来，使它们可以互相替换，且算法的变化不会影响使用算法的客户。策略模式属于对象行为模式，他通过对算法进行封装，把使用算法的责任和算法的实现分割开来，并委派给不同的对象对这些算法进行管理。
 
-![image-20230408091703482](设计模式.assets/image-20230408091703482.png)
+![image-20230408091703482](DesignPatterns.assets/image-20230408091703482.png)
 
-![image-20230408092120669](设计模式.assets/image-20230408092120669.png)
+![image-20230408092120669](DesignPatterns.assets/image-20230408092120669.png)
 
-![image-20230408092240267](设计模式.assets/image-20230408092240267.png)
+![image-20230408092240267](DesignPatterns.assets/image-20230408092240267.png)
 
-![image-20230408092522819](设计模式.assets/image-20230408092522819.png)
+![image-20230408092522819](DesignPatterns.assets/image-20230408092522819.png)
 
-![image-20230408092734427](设计模式.assets/image-20230408092734427.png)
+![image-20230408092734427](DesignPatterns.assets/image-20230408092734427.png)
 
 ## 5.3 命令模式
 
   将一个请求封装为一个对象，使发出请求的责任和执行请求的责任分割开。这样两者之间通过命令对象进行沟通，这样方便将命令对象进行存储，传递，调用，增加和管理。
 
-![image-20230408093311300](设计模式.assets/image-20230408093311300.png)
+![image-20230408093311300](DesignPatterns.assets/image-20230408093311300.png)
 
-![image-20230408093614557](设计模式.assets/image-20230408093614557.png)
+![image-20230408093614557](DesignPatterns.assets/image-20230408093614557.png)
 
-![image-20230408093731254](设计模式.assets/image-20230408093731254.png)
+![image-20230408093731254](DesignPatterns.assets/image-20230408093731254.png)
 
-![image-20230408093919400](设计模式.assets/image-20230408093919400.png)
+![image-20230408093919400](DesignPatterns.assets/image-20230408093919400.png)
 
 ## 5.4 责任链模式
 
   又名责任链模式，为了避免请求发送者与多个请求者耦合在一起，将所有请求的处理者通过前一对象记住其下一个对象的引用而连成一条链；当有请求发生时，可将请求沿着这条链传递，直到有对象处理它为止。
 
-![image-20230408094920207](设计模式.assets/image-20230408094920207.png)
+![image-20230408094920207](DesignPatterns.assets/image-20230408094920207.png)
 
-![image-20230408095049239](设计模式.assets/image-20230408095049239.png)
+![image-20230408095049239](DesignPatterns.assets/image-20230408095049239.png)
 
-![image-20230408100132881](设计模式.assets/image-20230408100132881.png)
+![image-20230408100132881](DesignPatterns.assets/image-20230408100132881.png)
 
-![image-20230408100226770](设计模式.assets/image-20230408100226770.png)
+![image-20230408100226770](DesignPatterns.assets/image-20230408100226770.png)
 
 ## 5.5 状态模式
 
   对有状态的对象，把复杂的判断逻辑提取到不同的状态对象中，允许状态对象在其内部状态发生变化时改变其行为。
 
-![image-20230408100829376](设计模式.assets/image-20230408100829376.png)
+![image-20230408100829376](DesignPatterns.assets/image-20230408100829376.png)
 
-![image-20230408101047077](设计模式.assets/image-20230408101047077.png)
+![image-20230408101047077](DesignPatterns.assets/image-20230408101047077.png)
 
-![image-20230408102243462](设计模式.assets/image-20230408102243462.png)
+![image-20230408102243462](DesignPatterns.assets/image-20230408102243462.png)
 
 ## 5.6 观察者模式
 
   又被称为发布-订阅模式，它定义了一种一对多的依赖，让多个观察者对象同时监听某一个主题对象。这个主题对象在状态变化时，会通知所有的观察者对象，使他们能够自动更新自己。
 
-![image-20230408102512059](设计模式.assets/image-20230408102512059.png)
+![image-20230408102512059](DesignPatterns.assets/image-20230408102512059.png)
 
-![image-20230408102749993](设计模式.assets/image-20230408102749993.png)
+![image-20230408102749993](DesignPatterns.assets/image-20230408102749993.png)
 
-![image-20230408103029910](设计模式.assets/image-20230408103029910.png)
+![image-20230408103029910](DesignPatterns.assets/image-20230408103029910.png)
 
-![image-20230408103237343](设计模式.assets/image-20230408103237343.png)
+![image-20230408103237343](DesignPatterns.assets/image-20230408103237343.png)
 
 ## 5.7 中介者模式
 
   又叫调停模式，定义一个中介角色来封装一系列对象之间的交互，使原有对象之间的松散耦合，使原有对象之间的耦合松散，且可以独立地改变他们之间的交互。
 
-![image-20230408104445936](设计模式.assets/image-20230408104445936.png)
+![image-20230408104445936](DesignPatterns.assets/image-20230408104445936.png)
 
-![image-20230408104724617](设计模式.assets/image-20230408104724617.png)
+![image-20230408104724617](DesignPatterns.assets/image-20230408104724617.png)
 
-![image-20230408110125237](设计模式.assets/image-20230408110125237.png)
+![image-20230408110125237](DesignPatterns.assets/image-20230408110125237.png)
 
-![image-20230408110338260](设计模式.assets/image-20230408110338260.png)
+![image-20230408110338260](DesignPatterns.assets/image-20230408110338260.png)
 
 ## 5.8 迭代器模式
 
   提供一个对象来顺序访问聚合对象中的一系列数据，而不暴露聚合对象的内部表示。
 
-![image-20230408110400076](设计模式.assets/image-20230408110400076.png)
+![image-20230408110400076](DesignPatterns.assets/image-20230408110400076.png)
 
 ## 5.9 访问者模式
 
   封装一些作用于某种数据结构中的各元素的操作，它可以在不改变这个数据结构的前提下定义作用于这些元素的新的操作。
 
-![image-20230408110612334](设计模式.assets/image-20230408110612334.png)
+![image-20230408110612334](DesignPatterns.assets/image-20230408110612334.png)
 
-![image-20230408123809256](设计模式.assets/image-20230408123809256.png)
+![image-20230408123809256](DesignPatterns.assets/image-20230408123809256.png)
 
-![image-20230408124030915](设计模式.assets/image-20230408124030915.png)
+![image-20230408124030915](DesignPatterns.assets/image-20230408124030915.png)
 
-![image-20230408124125595](设计模式.assets/image-20230408124125595.png)
+![image-20230408124125595](DesignPatterns.assets/image-20230408124125595.png)
 
 ## 5.10 备忘录模式
 
   又叫快照模式，在不破坏封装性的前提下，捕获一个对象的内部状态，并在该对象之外保存这个状态，以便以后需要时能够将该对象恢复到原先保存的状态。
 
-![image-20230408131704134](设计模式.assets/image-20230408131704134.png)
+![image-20230408131704134](DesignPatterns.assets/image-20230408131704134.png)
 
 ## 5.11 解释器模式
 
   给定一个语言，定义它的文法表示，并定义一个解释器，这个解释器使用该标识来解释语言中的语句。
 
-![image-20230408132152841](设计模式.assets/image-20230408132152841.png)
+![image-20230408132152841](DesignPatterns.assets/image-20230408132152841.png)
 
-![image-20230408132227058](设计模式.assets/image-20230408132227058.png)
+![image-20230408132227058](DesignPatterns.assets/image-20230408132227058.png)
 
-![image-20230408132442179](设计模式.assets/image-20230408132442179.png)
+![image-20230408132442179](DesignPatterns.assets/image-20230408132442179.png)
 

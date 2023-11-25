@@ -380,7 +380,7 @@ publicclassTestMain{
 
 ### 八线程间状态转换
 
-![image-20210401222740950](多线程学习笔记.assets/image-20210401222740950.png)
+![image-20210401222740950](Multithreading.assets/image-20210401222740950.png)
 
 #### 8.1synchronized,wait,notify
 

@@ -34,7 +34,7 @@ Hadoop三大发行版本：Apache、Cloudera、HortonWorks。
 
 ### 1.4 Hadoop组成
 
-![image-20210721150739350](hadoop3.x学习.assets/image-20210721150739350.png)
+![image-20210721150739350](hadoop3.x.assets/image-20210721150739350.png)
 
 #### 1.4.1 HDFS概述
 
@@ -54,19 +54,19 @@ Secondary NameNode(2NN) ==每隔一段时间对NameNode元数据备份==。
 3. ApplicationMaster（AM）：单个任务运行的管理。
 4. Container：容器，相当于一台独立的服务器，里面封装了任务运行所需要的资源，如内存、CPU、磁盘、网络等。
 
-![image-20210721152258179](hadoop3.x学习.assets/image-20210721152258179.png)
+![image-20210721152258179](hadoop3.x.assets/image-20210721152258179.png)
 
 #### 1.4.3 MapReduce架构概述
 
-![image-20210721152553155](hadoop3.x学习.assets/image-20210721152553155.png)
+![image-20210721152553155](hadoop3.x.assets/image-20210721152553155.png)
 
 #### 1.4.4 MapReduce、Yarn、MapReduce关系
 
-![image-20210721152926819](hadoop3.x学习.assets/image-20210721152926819.png)
+![image-20210721152926819](hadoop3.x.assets/image-20210721152926819.png)
 
 #### 1.4.5 大数据生态体系
 
-![image-20210721153536861](hadoop3.x学习.assets/image-20210721153536861.png)
+![image-20210721153536861](hadoop3.x.assets/image-20210721153536861.png)
 
 ## 2.Hadoop运行环境搭建
 
@@ -85,53 +85,53 @@ export PATH=$PATH:$HADOOP_HOME/sbin
 source /etc/profile
 ```
 
-![image-20210722104140077](hadoop3.x学习.assets/image-20210722104140077.png)
+![image-20210722104140077](hadoop3.x.assets/image-20210722104140077.png)
 
-![image-20210722104321510](hadoop3.x学习.assets/image-20210722104321510.png)
+![image-20210722104321510](hadoop3.x.assets/image-20210722104321510.png)
 
 3)配置文件
 
 core-site.xml
 
-![image-20210722104609846](hadoop3.x学习.assets/image-20210722104609846.png)
+![image-20210722104609846](hadoop3.x.assets/image-20210722104609846.png)
 
 hdfs-site.xml
 
-![image-20210722104729214](hadoop3.x学习.assets/image-20210722104729214.png)
+![image-20210722104729214](hadoop3.x.assets/image-20210722104729214.png)
 
 yarn-site.xml
 
-![image-20210722110035446](hadoop3.x学习.assets/image-20210722110035446.png)
+![image-20210722110035446](hadoop3.x.assets/image-20210722110035446.png)
 
 mapred-site.xml
 
-![image-20210722110139924](hadoop3.x学习.assets/image-20210722110139924.png)
+![image-20210722110139924](hadoop3.x.assets/image-20210722110139924.png)
 
 4)启动集群
 
-![image-20210722110528279](hadoop3.x学习.assets/image-20210722110528279.png)
+![image-20210722110528279](hadoop3.x.assets/image-20210722110528279.png)
 
-![image-20210722110540994](hadoop3.x学习.assets/image-20210722110540994.png)
+![image-20210722110540994](hadoop3.x.assets/image-20210722110540994.png)
 
 
 
 5）配置历史服务器
 
-![image-20210722112830479](hadoop3.x学习.assets/image-20210722112830479.png)
+![image-20210722112830479](hadoop3.x.assets/image-20210722112830479.png)
 
 xsync为自定义分发脚本
 
 6）配置日志聚集
 
-![image-20210722113354542](hadoop3.x学习.assets/image-20210722113354542.png)
+![image-20210722113354542](hadoop3.x.assets/image-20210722113354542.png)
 
 7）常用启动命令
 
-![image-20210722113840510](hadoop3.x学习.assets/image-20210722113840510.png)
+![image-20210722113840510](hadoop3.x.assets/image-20210722113840510.png)
 
 
 
-![image-20210722143751456](hadoop3.x学习.assets/image-20210722143751456.png)
+![image-20210722143751456](hadoop3.x.assets/image-20210722143751456.png)
 
 # HDFS
 
@@ -139,33 +139,33 @@ xsync为自定义分发脚本
 
 ### 1.1 HDFS产出背景
 
-![image-20210722144539129](hadoop3.x学习.assets/image-20210722144539129.png)
+![image-20210722144539129](hadoop3.x.assets/image-20210722144539129.png)
 
 ### 1.2 HDFS优缺点
 
 1. HDFS优点
 
-   ![image-20210722144826800](hadoop3.x学习.assets/image-20210722144826800.png)
+   ![image-20210722144826800](hadoop3.x.assets/image-20210722144826800.png)
 
 2. HDFS缺点
 
-   ![image-20210722145114854](hadoop3.x学习.assets/image-20210722145114854.png)
+   ![image-20210722145114854](hadoop3.x.assets/image-20210722145114854.png)
 
 ### 1.3 HDFS组成架构
 
-![image-20210722145508224](hadoop3.x学习.assets/image-20210722145508224.png)
+![image-20210722145508224](hadoop3.x.assets/image-20210722145508224.png)
 
-![image-20210722150011578](hadoop3.x学习.assets/image-20210722150011578.png)
+![image-20210722150011578](hadoop3.x.assets/image-20210722150011578.png)
 
 ### 1.4 HDFS文件块大小
 
-![image-20210722150459442](hadoop3.x学习.assets/image-20210722150459442.png)
+![image-20210722150459442](hadoop3.x.assets/image-20210722150459442.png)
 
-![image-20210722152802962](hadoop3.x学习.assets/image-20210722152802962.png)
+![image-20210722152802962](hadoop3.x.assets/image-20210722152802962.png)
 
 ## 2. HDFS 的Shell操作
 
-![image-20210722152930529](hadoop3.x学习.assets/image-20210722152930529.png)
+![image-20210722152930529](hadoop3.x.assets/image-20210722152930529.png)
 
 ### 2.1 上传
 
@@ -219,69 +219,69 @@ hadoop fs -du -s -h 文件夹
 hadoop fs -setrep 副本数量 文件
 ```
 
-![image-20210722155131888](hadoop3.x学习.assets/image-20210722155131888.png)
+![image-20210722155131888](hadoop3.x.assets/image-20210722155131888.png)
 
-![image-20210722155424637](hadoop3.x学习.assets/image-20210722155424637.png)
+![image-20210722155424637](hadoop3.x.assets/image-20210722155424637.png)
 
 ## 3. HDFS的读写流程
 
 ### 3.1 HDFS写入流程
 
-![image-20210722162250068](hadoop3.x学习.assets/image-20210722162250068.png)
+![image-20210722162250068](hadoop3.x.assets/image-20210722162250068.png)
 
 **网络拓扑-节点距离计算**
 
-![image-20210722163715380](hadoop3.x学习.assets/image-20210722163715380.png)
+![image-20210722163715380](hadoop3.x.assets/image-20210722163715380.png)
 
 机架感知（副本存储节点选择）
 
 **机架感知说明**
 
-![image-20210722164023405](hadoop3.x学习.assets/image-20210722164023405.png)
+![image-20210722164023405](hadoop3.x.assets/image-20210722164023405.png)
 
-![image-20210722164119760](hadoop3.x学习.assets/image-20210722164119760.png)
+![image-20210722164119760](hadoop3.x.assets/image-20210722164119760.png)
 
 ### 3.2 HDFS的读数据流程
 
 考虑节点最近和负载均衡两个方面选择节点。读数据是串行读取（从1到n个数据块串行读取）。
 
-![image-20210722165206387](hadoop3.x学习.assets/image-20210722165206387.png)
+![image-20210722165206387](hadoop3.x.assets/image-20210722165206387.png)
 
 ## 4.NameNode 和SecondaryNameNode
 
 ### 4.1 NameNode和2nn工作机制
 
-![image-20210722170418320](hadoop3.x学习.assets/image-20210722170418320.png)
+![image-20210722170418320](hadoop3.x.assets/image-20210722170418320.png)
 
 ### 4.3 Fsimage和Edits概念
 
-![image-20210722170827001](hadoop3.x学习.assets/image-20210722170827001.png)
+![image-20210722170827001](hadoop3.x.assets/image-20210722170827001.png)
 
 **查看image**
 
-![image-20210722170858368](hadoop3.x学习.assets/image-20210722170858368.png)
+![image-20210722170858368](hadoop3.x.assets/image-20210722170858368.png)
 
 **查看编辑日志**
 
-![image-20210722174246559](hadoop3.x学习.assets/image-20210722174246559.png)
+![image-20210722174246559](hadoop3.x.assets/image-20210722174246559.png)
 
 ## 5. DataNode
 
 **DataNode工作机制**
 
-![image-20210723094328584](hadoop3.x学习.assets/image-20210723094328584.png)
+![image-20210723094328584](hadoop3.x.assets/image-20210723094328584.png)
 
 **HDFS配置:hdfs-site.xml**
 
-![image-20210723094347302](hadoop3.x学习.assets/image-20210723094347302.png)
+![image-20210723094347302](hadoop3.x.assets/image-20210723094347302.png)
 
 **数据完整性**
 
-![image-20210723094834055](hadoop3.x学习.assets/image-20210723094834055.png)
+![image-20210723094834055](hadoop3.x.assets/image-20210723094834055.png)
 
 **DataNode离线时间设置**
 
-![image-20210723095224090](hadoop3.x学习.assets/image-20210723095224090.png)
+![image-20210723095224090](hadoop3.x.assets/image-20210723095224090.png)
 
 # MapReduce
 
@@ -289,69 +289,69 @@ hadoop fs -setrep 副本数量 文件
 
 定义：
 
-![image-20210723103922361](hadoop3.x学习.assets/image-20210723103922361.png)
+![image-20210723103922361](hadoop3.x.assets/image-20210723103922361.png)
 
 优缺点
 
-![image-20210723103857793](hadoop3.x学习.assets/image-20210723103857793.png)
+![image-20210723103857793](hadoop3.x.assets/image-20210723103857793.png)
 
 **mapReduce核心思想**
 
-![image-20210723110833959](hadoop3.x学习.assets/image-20210723110833959.png)
+![image-20210723110833959](hadoop3.x.assets/image-20210723110833959.png)
 
 **MapReduce进程**
 
-![image-20210723110906547](hadoop3.x学习.assets/image-20210723110906547.png)
+![image-20210723110906547](hadoop3.x.assets/image-20210723110906547.png)
 
 **常用的序列化类型**
 
-![image-20210723111406344](hadoop3.x学习.assets/image-20210723111406344.png)
+![image-20210723111406344](hadoop3.x.assets/image-20210723111406344.png)
 
 ## 2.MapReduce序列化
 
-![image-20210723150529648](hadoop3.x学习.assets/image-20210723150529648.png)
+![image-20210723150529648](hadoop3.x.assets/image-20210723150529648.png)
 
-![image-20210723150558214](hadoop3.x学习.assets/image-20210723150558214.png)
+![image-20210723150558214](hadoop3.x.assets/image-20210723150558214.png)
 
 ## 3. MapReduce框架原理
 
 ### 3.1InputFormat数据输入
 
-![image-20210723162724985](hadoop3.x学习.assets/image-20210723162724985.png)
+![image-20210723162724985](hadoop3.x.assets/image-20210723162724985.png)
 
 数据切片与MapTask并行度觉得机制
 
-![image-20210723163346481](hadoop3.x学习.assets/image-20210723163346481.png)
+![image-20210723163346481](hadoop3.x.assets/image-20210723163346481.png)
 
 **Job提交流程**
 
-![image-20210723165116133](hadoop3.x学习.assets/image-20210723165116133.png)
+![image-20210723165116133](hadoop3.x.assets/image-20210723165116133.png)
 
 **FileInputFormat切片源码解析**
 
-![image-20210726142539491](hadoop3.x学习.assets/image-20210726142539491.png)
+![image-20210726142539491](hadoop3.x.assets/image-20210726142539491.png)
 
 **FileInputFormat切片大小参数配置**
 
-![image-20210726143033992](hadoop3.x学习.assets/image-20210726143033992.png)
+![image-20210726143033992](hadoop3.x.assets/image-20210726143033992.png)
 
 **TextInputFormat方法**
 
-![image-20210726143141193](hadoop3.x学习.assets/image-20210726143141193.png)
+![image-20210726143141193](hadoop3.x.assets/image-20210726143141193.png)
 
 **CombineTextInputFormat方法**
 
-![image-20210726143947061](hadoop3.x学习.assets/image-20210726143947061.png)
+![image-20210726143947061](hadoop3.x.assets/image-20210726143947061.png)
 
-![image-20210726144228248](hadoop3.x学习.assets/image-20210726144228248.png)
+![image-20210726144228248](hadoop3.x.assets/image-20210726144228248.png)
 
 ### 3.2 MapReduce工作流程
 
 Reduce端进行数据的拉取。
 
-![image-20210726145822917](hadoop3.x学习.assets/image-20210726145822917.png)
+![image-20210726145822917](hadoop3.x.assets/image-20210726145822917.png)
 
-![image-20210726150142932](hadoop3.x学习.assets/image-20210726150142932.png)
+![image-20210726150142932](hadoop3.x.assets/image-20210726150142932.png)
 
 ### 3.3 Shuffle机制
 
@@ -359,33 +359,33 @@ Map方法之后，Reduce方法之前的数据处理称为Shuffle。
 
 > 排序的方法为快排，对key的索引按照字典进行排序。
 
-![image-20210726150930256](hadoop3.x学习.assets/image-20210726150930256.png)
+![image-20210726150930256](hadoop3.x.assets/image-20210726150930256.png)
 
 **Partitioner分区**
 
-![image-20210726153559921](hadoop3.x学习.assets/image-20210726153559921.png)
+![image-20210726153559921](hadoop3.x.assets/image-20210726153559921.png)
 
-![image-20210726153749355](hadoop3.x学习.assets/image-20210726153749355.png)
+![image-20210726153749355](hadoop3.x.assets/image-20210726153749355.png)
 
 **Combiner合并**
 
-![image-20210726162650454](hadoop3.x学习.assets/image-20210726162650454.png)
+![image-20210726162650454](hadoop3.x.assets/image-20210726162650454.png)
 
-![image-20210726162801309](hadoop3.x学习.assets/image-20210726162801309.png)
+![image-20210726162801309](hadoop3.x.assets/image-20210726162801309.png)
 
 ### 3.4 OutPutFormat
 
-![image-20210726174730974](hadoop3.x学习.assets/image-20210726174730974.png)
+![image-20210726174730974](hadoop3.x.assets/image-20210726174730974.png)
 
 ### 3.5 源码分析
 
 **MapTask工作机制**
 
-![image-20210727093324372](hadoop3.x学习.assets/image-20210727093324372.png)
+![image-20210727093324372](hadoop3.x.assets/image-20210727093324372.png)
 
 **ReduceTask工作机制**
 
-![image-20210727093509160](hadoop3.x学习.assets/image-20210727093509160.png)
+![image-20210727093509160](hadoop3.x.assets/image-20210727093509160.png)
 
 **注意事项**
 
@@ -398,7 +398,7 @@ Map方法之后，Reduce方法之前的数据处理称为Shuffle。
 
 ### 3.7 Reduce Join
 
-![image-20210727105707391](hadoop3.x学习.assets/image-20210727105707391.png)
+![image-20210727105707391](hadoop3.x.assets/image-20210727105707391.png)
 
 缺点：
 
@@ -406,11 +406,11 @@ Reduce端处理的方式，合并的操作在Reduce端完成，Reduce端的处�
 
 ### 3.8 Map Join
 
-![image-20210727142723683](hadoop3.x学习.assets/image-20210727142723683.png)
+![image-20210727142723683](hadoop3.x.assets/image-20210727142723683.png)
 
 ### 3.9 ETL数据清洗
 
-![image-20210727172952595](hadoop3.x学习.assets/image-20210727172952595.png)
+![image-20210727172952595](hadoop3.x.assets/image-20210727172952595.png)
 
 ## 4. MapReduce 数据压缩
 
@@ -426,9 +426,9 @@ Reduce端处理的方式，合并的操作在Reduce端完成，Reduce端的处�
 
 **常用的压缩编码**
 
-![image-20210802193007526](hadoop3.x学习.assets/image-20210802193007526.png)
+![image-20210802193007526](hadoop3.x.assets/image-20210802193007526.png)
 
-![image-20210802193103829](hadoop3.x学习.assets/image-20210802193103829.png)
+![image-20210802193103829](hadoop3.x.assets/image-20210802193103829.png)
 
 **压缩方式选择**
 
@@ -447,11 +447,11 @@ Reduce端处理的方式，合并的操作在Reduce端完成，Reduce端的处�
    - 优点：压缩和解压缩速度快；
    - 缺点：不支持切片，压缩率一般。
 
-![image-20210802194024486](hadoop3.x学习.assets/image-20210802194024486.png)
+![image-20210802194024486](hadoop3.x.assets/image-20210802194024486.png)
 
 **压缩参数配置**
 
-![image-20210802194146836](hadoop3.x学习.assets/image-20210802194146836.png)
+![image-20210802194146836](hadoop3.x.assets/image-20210802194146836.png)
 
 # Yarn
 
@@ -461,11 +461,11 @@ Reduce端处理的方式，合并的操作在Reduce端完成，Reduce端的处�
 
 ### 1.1 Yarn基础架构
 
-![image-20210802200049043](hadoop3.x学习.assets/image-20210802200049043.png)
+![image-20210802200049043](hadoop3.x.assets/image-20210802200049043.png)
 
 ### 1.2 Yarn工作机制
 
-![image-20210803192530042](hadoop3.x学习.assets/image-20210803192530042.png)
+![image-20210803192530042](hadoop3.x.assets/image-20210803192530042.png)
 
 ### 1.3 Yarn调度器和调度算法
 
@@ -490,11 +490,11 @@ Yahoo开发的多用户调度器。
 
 - 容量调度器特点
 
-![image-20210803194258465](hadoop3.x学习.assets/image-20210803194258465.png)
+![image-20210803194258465](hadoop3.x.assets/image-20210803194258465.png)
 
 - 容量调度器资源分配算法
 
-![image-20210803194700825](hadoop3.x学习.assets/image-20210803194700825.png)
+![image-20210803194700825](hadoop3.x.assets/image-20210803194700825.png)
 
 **Fair Scheduler**
 
@@ -502,21 +502,21 @@ Facebook开发的多用户调度器
 
 - 公平调度器特点
 
-![image-20210803195132560](hadoop3.x学习.assets/image-20210803195132560.png)
+![image-20210803195132560](hadoop3.x.assets/image-20210803195132560.png)
 
 公平调度器设计目标是：在时间尺度上，所有作用获得公平的资源。某一时刻一个作业应获得资源和实际获得资源的差距叫==缺额==。
 
 调度器会==优先为缺额大的作业分配资源==。
 
-![image-20210803195832665](hadoop3.x学习.assets/image-20210803195832665.png)
+![image-20210803195832665](hadoop3.x.assets/image-20210803195832665.png)
 
-![image-20210803200258700](hadoop3.x学习.assets/image-20210803200258700.png)
+![image-20210803200258700](hadoop3.x.assets/image-20210803200258700.png)
 
 - 公平调度器分配算法
 
-![image-20210803195939310](hadoop3.x学习.assets/image-20210803195939310.png)
+![image-20210803195939310](hadoop3.x.assets/image-20210803195939310.png)
 
-![image-20210803200210228](hadoop3.x学习.assets/image-20210803200210228.png)
+![image-20210803200210228](hadoop3.x.assets/image-20210803200210228.png)
 
 ## 2.Yarn常用命令
 
@@ -549,7 +549,7 @@ yarn queue -status <queue_name>
 
 ## 3.Yarn生产环境核心配置参数
 
-![image-20210817195612811](hadoop3.x学习.assets/image-20210817195612811.png)
+![image-20210817195612811](hadoop3.x.assets/image-20210817195612811.png)
 
 # Hadoop完全分布式(HA)模式搭建
 

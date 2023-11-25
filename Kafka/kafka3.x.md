@@ -17,19 +17,19 @@
 
   消息队列主要应用场景：**缓存/消峰、解耦、异步通信。**
 
-![image-20230404162639139](kafka3.x学习.assets/image-20230404162639139.png)
+![image-20230404162639139](kafka3.x.assets/image-20230404162639139.png)
 
-![image-20230404162730830](kafka3.x学习.assets/image-20230404162730830.png)
+![image-20230404162730830](kafka3.x.assets/image-20230404162730830.png)
 
-![image-20230404162911879](kafka3.x学习.assets/image-20230404162911879.png)
+![image-20230404162911879](kafka3.x.assets/image-20230404162911879.png)
 
 ##### 1.2.2 消息队列的两种模式
 
-![image-20230404163115827](kafka3.x学习.assets/image-20230404163115827.png)
+![image-20230404163115827](kafka3.x.assets/image-20230404163115827.png)
 
 #### 1.3 基础架构
 
-![image-20230404163648611](kafka3.x学习.assets/image-20230404163648611.png)
+![image-20230404163648611](kafka3.x.assets/image-20230404163648611.png)
 
 ## 2 Kafka快速入门
 
@@ -105,7 +105,7 @@ bin/kafka-server-start.sh -daemon config/server.properties
 
 bin/kafka-topics.sh 脚本以及主要参数
 
-![image-20230404171423737](kafka3.x学习.assets/image-20230404171423737.png)
+![image-20230404171423737](kafka3.x.assets/image-20230404171423737.png)
 
 #### 2.2.2 producer命令
 
@@ -123,7 +123,7 @@ bin/kafka-console-consumer.sh 脚本
 
   在消息发送的过程中，涉及到了两个线程--main线程和sender线程。在main线程中创建了一个双端队列RecordAccumulator。main线程将发送消息给RecordAccumulator，Sender线程不断从RecordAccumulator中拉取消息发送到Kafka Broker。
 
-![image-20230404173152295](kafka3.x学习.assets/image-20230404173152295.png)
+![image-20230404173152295](kafka3.x.assets/image-20230404173152295.png)
 
 ### 3.2 异步发送API
 
@@ -254,11 +254,11 @@ public class CustomProducer {
 
 #### 3.4.1 分区好处
 
-![image-20230407153349707](kafka3.x学习.assets/image-20230407153349707.png)
+![image-20230407153349707](kafka3.x.assets/image-20230407153349707.png)
 
 #### 3.4.2 默认分区规则
 
-![image-20230407154134713](kafka3.x学习.assets/image-20230407154134713.png)
+![image-20230407154134713](kafka3.x.assets/image-20230407154134713.png)
 
 ```java
 package producer;
@@ -390,7 +390,7 @@ public class CustomProducer {
 
 ### 3.5 生产者如何提高吞吐量
 
-![image-20230407161627890](kafka3.x学习.assets/image-20230407161627890.png)
+![image-20230407161627890](kafka3.x.assets/image-20230407161627890.png)
 
 ```java
 package producer;
@@ -453,13 +453,13 @@ public class CustomProducer {
 
 ### 3.6 数据可靠性
 
-![image-20230407162635202](kafka3.x学习.assets/image-20230407162635202.png)
+![image-20230407162635202](kafka3.x.assets/image-20230407162635202.png)
 
-![image-20230407163040291](kafka3.x学习.assets/image-20230407163040291.png)
+![image-20230407163040291](kafka3.x.assets/image-20230407163040291.png)
 
-![image-20230407163154449](kafka3.x学习.assets/image-20230407163154449.png)
+![image-20230407163154449](kafka3.x.assets/image-20230407163154449.png)
 
-![image-20230407163355589](kafka3.x学习.assets/image-20230407163355589.png)
+![image-20230407163355589](kafka3.x.assets/image-20230407163355589.png)
 
 ```java
         //ack类型
@@ -471,9 +471,9 @@ public class CustomProducer {
 
 ### 3.7 数据去重
 
-![image-20230407163932053](kafka3.x学习.assets/image-20230407163932053.png)
+![image-20230407163932053](kafka3.x.assets/image-20230407163932053.png)
 
-![image-20230407165206356](kafka3.x学习.assets/image-20230407165206356.png)
+![image-20230407165206356](kafka3.x.assets/image-20230407165206356.png)
 
 ```shell
 开启参数 enable.idempotence,默认为true;false关闭。
@@ -481,9 +481,9 @@ public class CustomProducer {
 
 #### 3.7.1 生产者事务
 
-![image-20230411152846685](kafka3.x学习.assets/image-20230411152846685.png)
+![image-20230411152846685](kafka3.x.assets/image-20230411152846685.png)
 
-![image-20230411152914885](kafka3.x学习.assets/image-20230411152914885.png)
+![image-20230411152914885](kafka3.x.assets/image-20230411152914885.png)
 
 ```java
 package producer;
@@ -530,11 +530,11 @@ public class ProducerTransaction {
 
 ### 3.8 数据有序
 
-![image-20230412095507719](kafka3.x学习.assets/image-20230412095507719.png)
+![image-20230412095507719](kafka3.x.assets/image-20230412095507719.png)
 
 ### 3.9 数据乱序
 
-![image-20230412095937847](kafka3.x学习.assets/image-20230412095937847.png)
+![image-20230412095937847](kafka3.x.assets/image-20230412095937847.png)
 
 ## 4 Kafka Broker
 
@@ -542,51 +542,51 @@ public class ProducerTransaction {
 
 #### 4.1.1 Zookeeper中存储的信息
 
-![image-20230412101424326](kafka3.x学习.assets/image-20230412101424326.png)
+![image-20230412101424326](kafka3.x.assets/image-20230412101424326.png)
 
 #### 4.1.2 KafkaBroker总体的工作流程
 
-![image-20230412102038403](kafka3.x学习.assets/image-20230412102038403.png)
+![image-20230412102038403](kafka3.x.assets/image-20230412102038403.png)
 
 ### 4.2 Kafka副本
 
 #### 4.2.1 Kafka副本基本信息
 
-![image-20230413110748927](kafka3.x学习.assets/image-20230413110748927.png)
+![image-20230413110748927](kafka3.x.assets/image-20230413110748927.png)
 
 #### 4.2.2 Leader选举流程
 
-![image-20230413155347776](kafka3.x学习.assets/image-20230413155347776.png)
+![image-20230413155347776](kafka3.x.assets/image-20230413155347776.png)
 
 #### 4.2.3 Leader和Follower故障处理细节
 
 **Follower故障处理细节**
 
-![image-20230413160422821](kafka3.x学习.assets/image-20230413160422821.png)
+![image-20230413160422821](kafka3.x.assets/image-20230413160422821.png)
 
 **Leader故障处理细节**
 
-![image-20230413160732682](kafka3.x学习.assets/image-20230413160732682.png)
+![image-20230413160732682](kafka3.x.assets/image-20230413160732682.png)
 
 #### 4.2.4 Leader Partition自动平衡
 
-![image-20230413171208841](kafka3.x学习.assets/image-20230413171208841.png)
+![image-20230413171208841](kafka3.x.assets/image-20230413171208841.png)
 
 ### 4.3 文件存储
 
 #### 4.3.1 文件存储机制
 
-![image-20230413171857376](kafka3.x学习.assets/image-20230413171857376.png)
+![image-20230413171857376](kafka3.x.assets/image-20230413171857376.png)
 
-![image-20230413172428280](kafka3.x学习.assets/image-20230413172428280.png)
+![image-20230413172428280](kafka3.x.assets/image-20230413172428280.png)
 
 #### 4.3.2 文件清除策略
 
-![image-20230413172748860](kafka3.x学习.assets/image-20230413172748860.png)
+![image-20230413172748860](kafka3.x.assets/image-20230413172748860.png)
 
-![image-20230413172850368](kafka3.x学习.assets/image-20230413172850368.png)
+![image-20230413172850368](kafka3.x.assets/image-20230413172850368.png)
 
-![image-20230413173247970](kafka3.x学习.assets/image-20230413173247970.png)
+![image-20230413173247970](kafka3.x.assets/image-20230413173247970.png)
 
 ### 4.4 高效读写数据
 
@@ -595,33 +595,33 @@ public class ProducerTransaction {
 3. 顺序写磁盘。
 4. 页缓存和零拷贝技术。
 
-![image-20230413173811562](kafka3.x学习.assets/image-20230413173811562.png)
+![image-20230413173811562](kafka3.x.assets/image-20230413173811562.png)
 
 ## 5 Kafka Consumer
 
 ### 5.1 kafka消费方式
 
-![image-20230414112755470](kafka3.x学习.assets/image-20230414112755470.png)
+![image-20230414112755470](kafka3.x.assets/image-20230414112755470.png)
 
 ### 5.2 消费者组工作流程
 
 #### 5.2.1 总体工作流程
 
-![image-20230414171820367](kafka3.x学习.assets/image-20230414171820367.png)
+![image-20230414171820367](kafka3.x.assets/image-20230414171820367.png)
 
 #### 5.2.2 消费者组原理
 
-![image-20230414174913990](kafka3.x学习.assets/image-20230414174913990.png)
+![image-20230414174913990](kafka3.x.assets/image-20230414174913990.png)
 
-![image-20230414175022380](kafka3.x学习.assets/image-20230414175022380.png)
+![image-20230414175022380](kafka3.x.assets/image-20230414175022380.png)
 
 **消费者组初始化流程**
 
-![image-20230414175832537](kafka3.x学习.assets/image-20230414175832537.png)
+![image-20230414175832537](kafka3.x.assets/image-20230414175832537.png)
 
 **消费者组详细消费流程**
 
-![image-20230417154939610](kafka3.x学习.assets/image-20230417154939610.png)
+![image-20230417154939610](kafka3.x.assets/image-20230417154939610.png)
 
 ### 5.3 消费者API
 
@@ -733,15 +733,15 @@ public class CustomConsumer {
 
 ### 5.4 分区分配策略
 
-![image-20230418175231668](kafka3.x学习.assets/image-20230418175231668.png)
+![image-20230418175231668](kafka3.x.assets/image-20230418175231668.png)
 
 #### 5.4.1 Range
 
-![image-20230418175407016](kafka3.x学习.assets/image-20230418175407016.png)
+![image-20230418175407016](kafka3.x.assets/image-20230418175407016.png)
 
 #### 5.4.2 RoundRobin
 
-![image-20230419174143253](kafka3.x学习.assets/image-20230419174143253.png)
+![image-20230419174143253](kafka3.x.assets/image-20230419174143253.png)
 
 ```java
 package producer;
@@ -798,17 +798,17 @@ public class CustomConsumer {
 properties.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG,org.apache.kafka.clients.consumer.StickyAssignor);
 ```
 
-![image-20230420142232878](kafka3.x学习.assets/image-20230420142232878.png)
+![image-20230420142232878](kafka3.x.assets/image-20230420142232878.png)
 
 ### 5.5 offset位移
 
-![image-20230420142530040](kafka3.x学习.assets/image-20230420142530040.png)
+![image-20230420142530040](kafka3.x.assets/image-20230420142530040.png)
 
-![image-20230420142605405](kafka3.x学习.assets/image-20230420142605405.png)
+![image-20230420142605405](kafka3.x.assets/image-20230420142605405.png)
 
 #### 5.5.1 自动提交offset
 
-![image-20230420143136787](kafka3.x学习.assets/image-20230420143136787.png)
+![image-20230420143136787](kafka3.x.assets/image-20230420143136787.png)
 
 ```java
         properties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG,true);
@@ -817,7 +817,7 @@ properties.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG,org.apache.ka
 
 #### 5.5.2 手动提交offset
 
-![image-20230420143509965](kafka3.x学习.assets/image-20230420143509965.png)
+![image-20230420143509965](kafka3.x.assets/image-20230420143509965.png)
 
 ```java
 package producer;
@@ -875,7 +875,7 @@ public class CustomConsumer {
 
 #### 5.5.3 指定offset消费
 
-![image-20230420143823617](kafka3.x学习.assets/image-20230420143823617.png)
+![image-20230420143823617](kafka3.x.assets/image-20230420143823617.png)
 
 ```java
 package producer;
@@ -1011,7 +1011,7 @@ public class CustomConsumer {
 
 #### 5.5.5 漏消费和重复消费
 
-![image-20230420145606250](kafka3.x学习.assets/image-20230420145606250.png)
+![image-20230420145606250](kafka3.x.assets/image-20230420145606250.png)
 
-![image-20230420145739004](kafka3.x学习.assets/image-20230420145739004.png)
+![image-20230420145739004](kafka3.x.assets/image-20230420145739004.png)
 
