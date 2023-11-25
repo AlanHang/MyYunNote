@@ -32,7 +32,7 @@ Docker是基于Go语言开发的项目。
 
 文档地址：https://docs.docker.com/
 
-![image-20211215193610733](docker学习.assets/image-20211215193610733.png)
+![image-20211215193610733](docker.assets/image-20211215193610733.png)
 
 仓库地址：https://hub.docker.com/
 
@@ -56,7 +56,7 @@ Docker是基于Go语言开发的项目。
 
 三个网络
 
-![image-20220228194028521](docker学习.assets/image-20220228194028521.png)
+![image-20220228194028521](docker.assets/image-20220228194028521.png)
 
 ```shell
 docker run -d -P --name tomcat01 tomcat
@@ -64,7 +64,7 @@ docker run -d -P --name tomcat01 tomcat
 docker exec -it tomcat01 ip addr
 ```
 
-![image-20220228200021490](docker学习.assets/image-20220228200021490.png)
+![image-20220228200021490](docker.assets/image-20220228200021490.png)
 
 > 原理
 
@@ -72,31 +72,31 @@ docker exec -it tomcat01 ip addr
 
 主机上的网卡与docker容器中的网卡是成对出现的。
 
-![image-20220302191453037](docker学习.assets/image-20220302191453037.png)
+![image-20220302191453037](docker.assets/image-20220302191453037.png)
 
-![image-20220302191523486](docker学习.assets/image-20220302191523486.png)
+![image-20220302191523486](docker.assets/image-20220302191523486.png)
 
 evth-pair 就是一对虚拟设备接口，他们都是成对出现的，一端连着协议，一端彼此相连，正因如此，evth-pair技术被充当一个桥梁，用来连接各种虚拟网络设备的。
 
-![image-20220302192040663](docker学习.assets/image-20220302192040663.png)
+![image-20220302192040663](docker.assets/image-20220302192040663.png)
 
 所有的容器不指定网络的情况下，都是docker0路由的，docker会给容器分配一个默认的可用ip，B类地址。使用的是linux的桥接模式，宿主机是docker容器的网桥docker0,容器中的所有网络接口都是虚拟的，虚拟网桥转发效率高。
 
-![image-20220302192444239](docker学习.assets/image-20220302192444239.png)
+![image-20220302192444239](docker.assets/image-20220302192444239.png)
 
 ## 7.1 ——link
 
 原理是在容器的host文件中添加link的主机地址。不建议使用。docker0存在的问题，不支持容器名连接服务。
 
-![image-20220302194140653](docker学习.assets/image-20220302194140653.png)
+![image-20220302194140653](docker.assets/image-20220302194140653.png)
 
-![image-20220302193208986](docker学习.assets/image-20220302193208986.png)
+![image-20220302193208986](docker.assets/image-20220302193208986.png)
 
 docker查看网络信息
 
-![image-20220302193512566](docker学习.assets/image-20220302193512566.png)
+![image-20220302193512566](docker.assets/image-20220302193512566.png)
 
-![image-20220302193854118](docker学习.assets/image-20220302193854118.png)
+![image-20220302193854118](docker.assets/image-20220302193854118.png)
 
 
 
@@ -114,13 +114,13 @@ host: 和宿主机共享网络
 
 container： 容器网络联通
 
-![image-20220302194639364](docker学习.assets/image-20220302194639364.png)
+![image-20220302194639364](docker.assets/image-20220302194639364.png)
 
 启动容器时，网络的默认参数为--net bridge ，也就是docker0。
 
 > 创建网络
 
-![image-20220302195053726](docker学习.assets/image-20220302195053726.png)****
+![image-20220302195053726](docker.assets/image-20220302195053726.png)****
 
 自定义网络可以通过服务名ping通网络。
 
@@ -198,7 +198,7 @@ sudo chmod +x docker-compose
  sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 ```
 
-![image-20220303191028468](docker学习.assets/image-20220303191028468.png)
+![image-20220303191028468](docker.assets/image-20220303191028468.png)
 
 ## 8.3 流程
 
@@ -248,15 +248,15 @@ Docker Engine 1.12 introduces swarm mode that enables you to create a cluster of
 
 There are two types of nodes: [**managers**](https://docs.docker.com/engine/swarm/how-swarm-mode-works/nodes/#manager-nodes) and [**workers**](https://docs.docker.com/engine/swarm/how-swarm-mode-works/nodes/#worker-nodes).
 
-![image-20220307191124099](docker学习.assets/image-20220307191124099.png)
+![image-20220307191124099](docker.assets/image-20220307191124099.png)
 
 >  docker 自带swarm的信息
 
-![image-20220307191416232](docker学习.assets/image-20220307191416232.png)
+![image-20220307191416232](docker.assets/image-20220307191416232.png)
 
 > 初始化主节点：
 
-![image-20220307191657435](docker学习.assets/image-20220307191657435.png)
+![image-20220307191657435](docker.assets/image-20220307191657435.png)
 
 > docker 生成token令牌
 
@@ -289,7 +289,7 @@ Raft协议：保证大多数节点存活在可以用，集群至少大于三台�
 
 容器内的命令，细节任务。
 
-![image-20220307194611256](docker学习.assets/image-20220307194611256.png)
+![image-20220307194611256](docker.assets/image-20220307194611256.png)
 
 > docker Stack/docker Secret/docker Config 
 
