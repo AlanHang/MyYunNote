@@ -20,6 +20,10 @@ git config --global https.https://github.com.proxy socks5://127.0.0.1:1080
 git config --global http.proxy https://127.0.0.1:1081
 
 git config --global https.proxy https://127.0.0.1:1081
+
+#清除代理
+git config --global --unset http.proxy
+git config --global --unset https.proxy
 ```
 
 # 解决ssh: connect to host github.com port 22: Connection refused

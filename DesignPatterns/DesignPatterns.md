@@ -451,7 +451,7 @@ public class OrderPizza {
 
 ```
 
-## 3.3 克隆模式
+## 3.3 原型模式
 
 ![image-20230405100152232](DesignPatterns.assets/image-20230405100152232.png)
 
