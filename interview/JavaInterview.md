@@ -418,7 +418,7 @@ spring ioc容器的创建过程
 
 > 构造器注入无解，设值注入提前暴露依赖
 
-## Spring如何解决循环依赖
+## Spring 如何解决循环依赖
 
 Spring 只支持设值注入的单例循环依赖，使用三级缓存解决循环依赖。
 
@@ -465,6 +465,113 @@ Spring 支持的隔离级别
 | PROPAGATION_NOT_SUPPORTS | 以非事务方式运行，假设当前存在事务，则挂起当前事务         |
 | PROPAGATION_NENVER       | 以非事务方式运行,假设当前存在事务，则抛异常                |
 | PROPAGATION_NESTED       | 如果当前存在事务，则嵌套执行，如果没有事务，则新建一个事务 |
+
+## Spring 事务问题
+
+Spring 有个bean对象，方法a和方法b, a方法中有事务，调用b,那么b中有事务吗？
+
+| 调用方式                    | b 方法是否有事务 | 原因             |
+| :-------------------------- | :--------------- | :--------------- |
+| **this.b()** (直接调用)     | ❌ **没有事务**   | AOP 代理机制失效 |
+| **self.b()** (注入自身代理) | ✅ **有事务**     | 通过代理调用     |
+| **@Transactional 注解位置** | 影响生效范围     | 注解的继承性     |
+
+## Spring中事务的本质是什么？
+
+Spring 中事务的本质是基于Spring的AOP代理能力，对数据库事务的能力进行封装。Spring将数据库连接保存到ThreadLocal中，保证一个线程中多个map和dao使用同一个连接。
+
+## BeanFactory和ApplicationContenxt的区别
+
+BeanFactory 是基础容器，定义了获取bean的方法。ApplicationContext 继承了 BeanFactory，并额外扩展了很多能力。
+
+BeanFactory是懒加载，用到bean时才会加载对应的Bean对象。ApplicationContext默认启动时就创建单例Bean。
+
+## BeanFactoryPostProcessor和BeanPostProcessor的区别
+
+BeanFactoryPostProcessor 作用于 BeanDefinition，在 Bean 实例化之前执行，用于修改 Bean 的元数据。
+
+BeanPostProcessor 作用于 Bean 实例，在 Bean 初始化前后执行，用于增强或包装 Bean，例如 AOP 代理。
+
+两者最大的区别是处理阶段不同，一个**操作定义**，一个**操作实例**。
+
+| 对比点       | BeanFactoryPostProcessor | BeanPostProcessor |
+| ------------ | ------------------------ | ----------------- |
+| 处理对象     | BeanDefinition           | Bean实例          |
+| 执行时机     | 实例化之前               | 实例化之后        |
+| 能否操作实例 | ❌                        | ✅                 |
+| 能否改元数据 | ✅                        | ❌                 |
+| 是否参与 AOP | ❌                        | ✅                 |
+| 典型场景     | 解析配置                 | 创建代理          |
+
+## SpringMVC的理解
+
+springMVC的结构图
+
+```
+客户端请求
+     ↓
+DispatcherServlet
+     ↓
+HandlerMapping（找谁处理）
+     ↓
+HandlerAdapter（怎么调用）
+     ↓
+Controller
+     ↓
+ViewResolver
+     ↓
+返回响应
+```
+
+执行流程
+
+```
+1. 请求进入 DispatcherServlet
+2. HandlerMapping 查找匹配的 Controller
+3. HandlerAdapter 适配执行
+4. 参数解析
+5. 调用 Controller 方法
+6. 返回 ModelAndView 或对象
+7. 视图解析或 JSON 序列化
+8. 响应返回
+```
+
+SpringMVC 是一个基于 Servlet 的 Web 框架，核心是 DispatcherServlet 前端控制器。
+请求进入后通过 HandlerMapping 找到对应的 Controller 方法，再由 HandlerAdapter执行。
+在执行过程中通过参数解析器（HandlerMethodArgumentResolver）完成数据绑定，通过消息转换器（HttpMessageConverter）实现 JSON 转换。
+执行完成后通过视图解析器或消息转换器生成响应。
+整体采用前端控制器、适配器、策略等设计模式，实现高度解耦和可扩展性。
+
+## @RequestBody 原理
+
+@RequestBody 本质是通过 HandlerMethodArgumentResolver 解析方法参数，在解析过程中会调用 HttpMessageConverter 读取请求体并将 JSON 转为 Java 对象。
+
+## 拦截器 vs 过滤器
+
+| 对比                 | 过滤器 Filter             | 拦截器 Interceptor |
+| -------------------- | ------------------------- | ------------------ |
+| 规范                 | Servlet 规范              | Spring 提供        |
+| 作用范围             | 所有请求                  | 只拦截 SpringMVC   |
+| 执行顺序             | 在 DispatcherServlet 之前 | 在 Controller 前后 |
+| 能否操作 Spring Bean | 不方便                    | 可以               |
+
+过滤器更底层，属于 Servlet 规范；
+
+拦截器属于 SpringMVC 框架内部，主要用于业务层控制，比如权限校验。
+
+## DelegatingFilterProxy的理解
+
+DelegatingFilterProxy 是一个特殊的 Filter，它本身由 Servlet 容器管理，但会把请求转发给 Spring 容器中的某个 Filter Bean 执行。
+它解决了 Servlet Filter 无法直接注入 Spring Bean 的问题。
+在 Spring Security 中，它会代理 springSecurityFilterChain 这个 Bean，从而构建完整的安全过滤器链。
+
+# SpringBooot
+
+
+
+
+
+
 
 
 
