@@ -567,7 +567,119 @@ DelegatingFilterProxy 是一个特殊的 Filter，它本身由 Servlet 容器管
 
 # SpringBooot
 
+## SpringBoot 自动装配原理
 
+SpringBoot 自动装配的核心是 @EnableAutoConfiguration。
+
+它通过 AutoConfigurationImportSelector 读取 META-INF 下的自动配置类列表，然后根据条件注解进行筛选，最终将满足条件的配置类注册到 Spring 容器中，从而实现按需装配。
+
+## SPI和自动装配的区别
+
+SPI 是一种服务发现机制，通过读取 META-INF/services 下的配置文件加载接口实现类；
+SpringBoot 自动装配是通过 @EnableAutoConfiguration 导入自动配置类，并结合条件注解按需注册 Bean。自动装配借鉴了 SPI 的思想，但增加了条件判断、Bean 注册和生命周期管理，是更高级的扩展机制。
+
+## SpringFactoriesLoader机制
+
+SpringFactoriesLoader 是 Spring 提供的一个 SPI 扩展加载机制，用于从 META-INF/spring.factories 文件中加载指定接口的实现类。
+Spring Boot 通过它加载自动装配类、监听器、初始化器等。
+它的核心流程是读取所有 jar 中的 spring.factories 文件，解析为 Map，再根据接口名找到实现类并反射实例化，同时支持排序。
+
+## import注解的理解
+
+@Import 用于向容器中导入额外的组件或配置类，本质是注册 BeanDefinition。它支持导入普通类、配置类、ImportSelector（selectImports方法） 和 ImportBeanDefinitionRegistrar （registerBeanDefinitions方法）。Spring Boot 自动装配底层就是通过 ImportSelector 实现的。Import 在配置类解析阶段由 ConfigurationClassPostProcessor 处理。
+
+## DeferredImportSelector 原理
+
+DeferredImportSelector 是 ImportSelector 的一种延迟实现方式，它不会在解析到 @Import 时立即执行，而是等所有 @Configuration 类解析完成之后统一执行。
+
+Spring Boot 的自动装配就是通过 DeferredImportSelector 实现的，目的是保证用户自定义配置优先注册，确保 @Conditional 条件判断的准确性。
+
+# Nacos注册中心
+
+## 如何设计一个注册中心
+
+1. 高可用，可以用CP或者AP，常见的是AP模式。
+2. 服务注册，服务发现，服务探活，服务下线。
+3. 服务订阅和推送（不是必须的）
+
+## Nacos1.x作为注册中心的原理
+
+Nacos 1.x的核心原理是基于Distro协议的AP架构。它通过分片写的设计保证了注册的高并发，通过异步复制实现最终一致性。在健康检查上，采用5秒心跳+15秒不健康+30秒剔除的机制。在服务发现上，采用UDP推送保证实时性，同时用10秒定时拉取兜底。这种设计在保证高可用的前提下，很好地平衡了数据一致性和性能，但缺点就是1.x的HTTP短连接在大规模场景下开销较大，而2.x的gRPC长连接正好优化了这点。
+
+## nacos服务领域模型
+
+- Namespace: 环境隔离或租户隔离。
+- Group: 逻辑上的业务模块划分。
+- Service: 最核心的业务概念，直接对应开发者在代码中定义的微服务。
+- Cluster: 实现更细粒度的路由和容灾。
+- Instance: 最底层的元素，代表一个真实的、提供服务的IP地址和端口。
+
+## Nacos的Distro协议
+
+Nacos中的Distro协议是其处理临时实例的AP型一致性协议。它的核心特点是**去中心化**和**最终一致性**。
+在写请求上，它采用**分片机制**，每个实例只有其‘责任节点’才能处理写操作，避免了冲突；写入成功后通过**异步任务**批量同步给其他节点。
+在读请求上，得益于异步复制，所有节点都能**本地读取**全量数据，性能极高。
+此外，节点间还会通过**周期性的数据校验**实现自我修复。
+这种设计完美适配了注册中心对‘高可用’和‘高并发读’的需求，但代价是允许极短暂的数据不一致。
+
+## 配置中心选型
+
+| 特性维度          | **Spring Cloud Config**                  | **Apollo**                                        | **Nacos**                          | **K8s ConfigMap**                       |
+| :---------------- | :--------------------------------------- | :------------------------------------------------ | :--------------------------------- | :-------------------------------------- |
+| **实时推送**      | 需集成Spring Cloud Bus和消息队列才能实现 | **原生支持**，基于HTTP长轮询，秒级生效            | **原生支持**，基于长连接，实时性高 | 不支持，需配合工具（如Reloader）重启Pod |
+| **版本管理/回滚** | 依赖Git，回滚即Git回滚                   | **界面化支持**，可视化一键回滚                    | **界面化支持**，可视化一键回滚     | 依赖Yaml版本管理，回滚较原始            |
+| **权限/审计**     | 弱（依赖Git权限）                        | **强**，企业级，有完善的操作审计和权限控制        | 较强，支持命名空间和角色权限       | 弱（依赖K8s RBAC）                      |
+| **多环境/多集群** | 通过Git分支管理，不够直观                | **强**，通过Namespace和Cluster抽象，管理清晰      | **强**，通过Namespace和Group隔离   | 通过Namespace隔离，管理相对分散         |
+| **配置格式**      | 文件（Properties/Yaml）                  | **支持**Properties、XML、Yaml、JSON等多种格式     | **支持**多种格式                   | 文件或环境变量                          |
+| **多语言支持**    | 主要面向Java                             | 主流语言均有SDK，提供HTTP API                     | 主流语言均有SDK，提供HTTP API      | 任何运行在K8s的应用均可使用             |
+| **依赖与复杂度**  | 轻量，但需自建监控告警                   | 功能丰富，组件较多（Portal、Admin、Config），较重 | 轻量，注册中心和配置中心一体化     | 与K8s强绑定，无外部依赖                 |
+| **数据一致性**    | Git的强一致性                            | **准强一致**，内部有数据库保证                    | **AP型**（最终一致），适合配置管理 | **强一致**（基于Etcd）                  |
+
+## Nacos1.x配置中心的长轮询机制
+
+客户端发起一次可能长达30秒的HTTP请求，服务端在29.5秒内如果发现配置变更，就立即返回；如果一直没变，则在第29.5秒返回“无变更”。
+
+## Nacos配置中心的配置优先级
+
+优先级从低到高是 shared-configs、extension-configs、默认 DataId、profile DataId。同时远程配置通常高于本地 application.yml。
+
+## Nacos2.x的探活机制
+
+服务端会启动一个**每3秒**执行一次的定时任务，扫描所有**超过20秒**未通过该连接进行任何通信的客户端。对于这些“静默”客户端，服务端会主动发送一个 **`ClientDetectionRequest`** 探测请求。如果客户端在**1秒内**成功响应，则连接和其注册的服务被视为健康；否则，服务端会认为连接已失效，并执行 `unregister` 操作，移除该连接及其下所有注册的临时实例。
+
+## Ribbon怎么实现不同服务的不同配置
+
+为不同服务创建不同的上下文。内部维护一个ConcurrentHashMap来存储服务和上下文的对应关系。
+
+## Ribbon的属性配置和类配置优先级
+
+**类配置（Java代码）的优先级要高于属性配置（配置文件**
+
+## feign的性能优化
+
+Feign 默认使用 JDK 的 `HttpURLConnection`，**不支持连接池**，每次请求都会新建和关闭连接，导致大量 TIME_WAIT，性能较差。推荐替换为 **Apache HttpClient** 或 **OkHttp**，它们支持连接池、超时控制和更高效的 IO。
+
+## feign怎么实现认证传递
+
+使用 RequestInterceptor 传递 Token。如果使用了 Hystrix 或 Sentinel 且线程池隔离，`RequestContextHolder` 会丢失上下文。此时需要手动传递 Token。
+
+## sentienl中使用的限流算法
+
+1. 滑动窗口计数，减少固定窗口计数的边界问题。
+2. 漏斗算法，恒定速率流出（处理任务）。
+3. 令牌桶算法，恒定速率流入（生成令牌）。
+
+## sentienl服务的熔断过程
+
+1. 熔断器关闭：服务正常调用。
+2. 熔断器打开：服务异常，调用fallback方法。
+3. 熔断器半开：熔断到达熔断恢复的时间后，允许少量请求调用服务并监测成功率。
+
+## 在GateWay中怎么实现服务的平滑迁移
+
+- **简单金丝雀发布** → 权重路由。
+- **需要按用户或请求内容区分** → 结合服务发现元数据和自定义断言。
+- **频繁调整** → 配置中心 + 动态刷新。
 
 
 
