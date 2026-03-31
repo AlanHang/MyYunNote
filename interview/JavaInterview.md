@@ -1714,6 +1714,8 @@ es通过协调节点将数据转发给分片所在的节点上，然后同时写
 
 ## docker和虚拟机的区别
 
+docker是轻量级的沙盒，在其中运行的只是应用。而虚拟机里边还有额外的独立操作系统运行。
+
 | 维度           | Docker (容器)                                                | 虚拟机 (VM)                                                  |
 | :------------- | :----------------------------------------------------------- | :----------------------------------------------------------- |
 | **架构**       | 容器共享宿主机的操作系统内核，每个容器运行在独立的用户空间，通过命名空间（Namespace）和 cgroups 实现隔离。 | 虚拟机包含完整的客户操作系统（Guest OS），运行在 Hypervisor 之上，Hypervisor 对硬件资源进行虚拟化，为每个虚拟机分配独立的虚拟硬件。 |
@@ -1725,3 +1727,290 @@ es通过协调节点将数据转发给分片所在的节点上，然后同时写
 | **镜像大小**   | 轻量，通常几十到几百 MB。                                    | 重量，通常数 GB。                                            |
 | **部署与迁移** | 镜像分层、快速部署，易于版本控制和 CI/CD 集成。              | 虚拟机镜像较大，迁移相对笨重。                               |
 | **持久化数据** | 容器默认无状态，数据存储通常通过挂载卷（Volumes）管理，生命周期独立于容器。 | 虚拟机通常通过虚拟磁盘持久化数据，生命周期与 VM 绑定。       |
+
+## 简述k8s和docker的关系
+
+docker通过doeckerfile将应用程序运行所需要设置和依赖打包到一个容器中，从而实现可移植性的特点。k8s用于关联和编排在多个主机上运行的容器。
+
+## 简述kube-porxy ipvs和iptables的异同
+
+相同之处： 都是基于netfilter内核转发
+
+不同之处： iptable是为防火墙设计的，ipvs是专门用于高性能LB集群-LVS实现的。
+
+kernelspace专用于windows系统的，userspace是早期版本的实现。
+
+iptables:
+
+- 优点：灵活，功能强大（根据tcp不同状态对包进行操作）
+- 缺点：表中规则过多时会导致响应变慢
+
+ipvs:
+
+- 优点：转发效果高(基于优化的Hash表)，调度算法丰富
+- 缺点：低版本内核可能不支持。与部分 CNI 插件（如 Calico）可能存在兼容性问题。
+
+## kube-porxy修改代理模式为ipvs的方法
+
+1. 载入模块
+
+   ```shell
+   cat > /etc/sysconfig/modules/ipvs.modules <<EOF
+   #!/bin/bash
+    ipvs_moudle_dir-"/usr/lib/moudles/\`uname -r`/kernel/net/netfilter/ipvs"
+    for i in `ls \$ipvs_moudle_dir | sed -r 's#(.*).ko.xz#\1#\'`;do
+    	/sbin/modinfo -F filename \$i &> /dev/null
+    	if [\$? -eq 0 ];then
+    		/sbin/modprobe \$i
+    	fi
+    done
+   EOF
+   chmod +x /etc/sysconfig/modules/ipvs.modules;
+   bash /etc/sysconfig/modules/ipvs.modules
+   ```
+
+2. 确保所有节点运行
+
+   `lsmod | grep ip_vs`
+
+3. 修改kube-proxy configMap文件
+
+   `kubectl edit configmap kube-proxy -n kube-system`
+
+   `mode: "" 改为 mode:"ipvs"`
+
+4. 删除所有kube-proxy
+
+   ```shell
+   kubectl delete pods `"kubectl get pod -n kube-system | grep kube-proxy | awk '${print $1}'"` -n kube-system
+   #或者使用
+   kubectl delete pods -l k8s-app=kube-proxy -n kube-system
+   ```
+
+5. 查看重启后的pod是否为ipvs
+
+   ```shell
+   kubectl get pods -n kube-system -o wide | grep proxy
+   
+   kubectl logs 容器名 -n kube-system
+   ```
+
+6. 按照ipvsadm查看具体的ipvs规则
+
+   ```shell
+   # 按照 ipvsadm
+   yum install -y ipsadm
+   #查看规则
+   ipvsadm -ln
+   ```
+
+## 简述微服务部署中的蓝绿发布
+
+发布两套相同的系统，一般用于测试使用。
+
+优点：零停机发布、快速回滚、环境隔离
+
+缺点：只能进行全量切换，需要两倍的资源
+
+**k8s中蓝绿发布**
+
+通过Label + Selector来实现
+
+```shell
+# 蓝环境（当前线上）
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app-blue
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: my-app
+      version: blue
+  template:
+    metadata:
+      labels:
+        app: my-app
+        version: blue
+    spec:
+      containers:
+      - name: app
+        image: my-app:v1
+#绿环境（新版本）
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app-green
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: my-app
+      version: green
+  template:
+    metadata:
+      labels:
+        app: my-app
+        version: green
+    spec:
+      containers:
+      - name: app
+        image: my-app:v2
+#Service（关键）
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-app-service
+spec:
+  selector:
+    app: my-app
+    version: blue   # 当前指向蓝环境
+  ports:
+    - port: 80
+      targetPort: 8080
+```
+
+## k8s中的静态pod
+
+由kubelet创建，并且总是在kubelet所在的node节点运行。
+
+![image-20260331160901820](JavaInterview.assets/image-20260331160901820.png)
+
+- 配置 manifest 目录：在 kubelet 启动参数中指定 --pod-manifest-path，或者在配置文件中设置 staticPodPath。默认常见路径：/etc/kubernetes/manifests
+- 编写 Pod YAML：将标准的 Pod YAML 文件放入该目录。
+- kubelet 自动生效：文件放入后，kubelet 会在几秒内启动 Pod。
+
+## k8s数据持久化的方式有哪些
+
+1. emptydir: 临时存储数据，生命周期与pod一直
+2. hostpath: 类似docker bind mount,挂载到宿主机目录
+3. pv/pvc  nfs,gfs,ceph分布式存储
+
+## dockerfile中的copy和add区别
+
+copy是将宿主机中的文件拷贝到容器内；add也会拷贝文件并解压缩，并支持url。
+
+## 如何为k8s集群添加新的节点
+
+1. 查看token是否存在
+
+   ```shell
+   kubeadm token list
+   kubeadm token create --print-join-command (--ttl 0 过期时间)
+   ```
+
+2. 排空pod
+
+   ```shell
+   kubectl drain 节点名称 --delete-local-data --force --ingnore-daemonsets
+   kubect delete node 节点名称
+   ```
+
+3. 清空集群数据
+
+   ```shell
+   kubeadm reset -f
+   systemctl stop kubelet
+   systemctl stop docker 
+   rm -rf /var/lib/cni/
+   rm -rf /var/lib/kubelet/*
+   rm -rf /etc/cni/
+   ifconfig cni0 down
+   ifconfig flannel.1 down
+   systemctl start docker
+   iptables -F && sudo iptables -t nat -F && sudo iptables -t mangle -F && iptables -X
+   ipvsadm -C
+   ```
+
+4. 重新添加到集群
+
+   ```shell
+   kubeadm token list
+   openssl x509 -pubkey -in /etc/kubernets/pki/ca.crt | openssl rsa -pubin -outform der 2>/dev/null | openssl dgst -sha256 -hex | sed `s/^.* //`
+   kubeadm join 主节点:6443 --token token的key --discovery-token-ca-cert.hash sha256:token的值
+   ```
+
+## 自定义svc端口报错是什么原因
+
+k8s默认的路径范围为：30000-32767。需要修改kube-apiserver的配置文件，通过kubeadm安装，默认安装路径/etc/kubernetets/mainfest/kube-apiserver.yaml，修改此文件，添加--service-node-port-rang=30000-43767。
+
+重启kube-apiserver中的pod
+
+```shell
+export apiserver_pods=$(kubectl get pods --selector=componet=kube-apiserver -n kube-system --output=jsonpath={.item..metadata.name})
+
+kubectl delete pod $apiserver_pods -n kube-system
+```
+
+## k8s中常用控制器以及特点
+
+deployment: 部署无状态的应用  启动顺序是无序的，名字和ip地址是随机的，后端存储是共享的。
+
+DaemonSet: 每台主机部署一个pod
+
+StatefulSet: 部署有状态的应用
+
+CronJob: 定时运行pod
+
+Job: 一次性运行pod
+
+## k8s拉伸收缩副本失效是什么原因
+
+自动扩展实现的方式：autoscale和HPA。失败的原因与自动拉伸冲突有关。
+
+## node节点容忍异常时间如何设置
+
+node节点异常时间默认是300s。
+
+服务中断时间=停机等待时间300s+重建时间+服务启动时间+readiness探针监检测正常时间。
+
+![image-20260331195031541](JavaInterview.assets/image-20260331195031541.png)
+
+## 简述deployment控制器的升级和回滚部署
+
+```shell
+#yaml文件中revisionHisotryLimit配置规定记录多少个版本
+# 发布时记录版本
+kubectl deploy -f pc-deployment.yaml --record
+# 查看历史版本命令
+kubectl rollout history deployment -n 命名空间 服务名称
+# 回滚命令
+kubectl rollout undo deployment -n 命名空间 服务名称 --to-version=(修订号)
+
+```
+
+## k8s存储卷有哪些，说明他们的特征以及作用
+
+emptyDir: pod调度到节点时创建的一个临时空目录，Pod删除随之删除，用于容器间分享文件
+
+hostPath: 节点存储卷，挂载宿主机的文件或目录到Pod中
+
+pv/PVC: 是外部存储系统中的一块存储空间，具有持久性，生命周期独立于Pod
+
+StoageClass: 充当PV的模板，从而可以动态创建所需的PV,自动构建相对应的PV持久化存储卷。
+
+configmap: 使一个配置文件多台机器共用，杜绝重复修改，支持热更新且支持挂载。
+
+secret: 将密码转换为密文，写入配置清单中，起到加密的作用。
+
+## kubectl不能自动补全的原因
+
+1. 安装bash-completion
+
+   `yum install -y bash-completion` 
+
+   source /usr/share/bash-completion/bash_completion 使文件生效
+
+2. 应用kubectl的completion到系统环境
+
+   ```shell 
+   source < (kubectl completion bash)
+   echo "source < (kubectl completion bash)" >> ~/.bashrc
+   ```
+
+## 如何阻止yum或者apt自动更新linux内核 docker 与k8s版本
+
+![image-20260331201448553](JavaInterview.assets/image-20260331201448553.png)
+
+![image-20260331201544803](JavaInterview.assets/image-20260331201544803.png)
